@@ -13,7 +13,7 @@ The project is developed collaboratively by the assigned group as part of the co
 ## 👥 Team Information
 
 - **Section:** 
-- **Group Leader - 1 :**
+- **Group Leader - 1 :MENDOZA, KHENNETH JOHN **
 
 ### Team Members
 - Member 2
