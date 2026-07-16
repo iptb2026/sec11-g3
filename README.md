@@ -20,7 +20,7 @@ The project is developed collaboratively by the assigned group as part of the co
 - Member 3 : Jagmoc
 - Member 4 : Socnoben
 - Member 5 : Plaza
-- Member 6
+- Member 6 : Carbonilla 
 - Member 7 (if applicable)
 
 ---
