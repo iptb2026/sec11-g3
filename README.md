@@ -18,7 +18,7 @@ The project is developed collaboratively by the assigned group as part of the co
 ### Team Members
 - Member 2 : Poloyapoy 
 - Member 3 : Jagmoc
-- Member 4
+- Member 4 : Socnoben
 - Member 5
 - Member 6
 - Member 7 (if applicable)
