@@ -24,6 +24,7 @@ The project is developed collaboratively by the assigned group as part of the co
 - Member 7 : Dumas
 - Member 8 : Equibal
 - Member 9 : Gonzaga
+- Member 10 : Bolongaita
 ---
 
 ## 🧱 Tech Stack
