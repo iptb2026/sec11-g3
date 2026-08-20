@@ -1,60 +1,54 @@
 # ==== LAYER 1: Foundation & Reference Data ====
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
 from app.core.db_utils import commit_or_409
 from app.database.session import get_db
-from app.models.role import Role
-from app.schemas.role import RoleCreate, RoleOut
+from app.models.fee_type import FeeType
+from app.schemas.fee_type import FeeTypeCreate, FeeTypeOut
 
-router = APIRouter(prefix="/roles", tags=["Layer 1 - Roles"])
+router = APIRouter(prefix="/fee-types", tags=["Layer 1 - Fee Types"])
 
-
-@router.post("/", response_model=RoleOut, status_code=status.HTTP_201_CREATED)
-def create_role(role: RoleCreate, db: Session = Depends(get_db)):
-    existing = db.query(Role).filter(Role.role_code == role.role_code).first()
+@router.post("/", response_model=FeeTypeOut, status_code=status.HTTP_201_CREATED)
+def create_fee_type(fee_type: FeeTypeCreate, db: Session = Depends(get_db)):
+    existing = db.query(FeeType).filter(FeeType.fee_code == fee_type.fee_code).first()
     if existing:
-        raise HTTPException(status_code=400, detail="role_code already exists")
+        raise HTTPException(status_code=400, detail="fee_code already exists")
 
-    new_role = Role(**role.model_dump())
-    db.add(new_role)
+    new_fee_type = FeeType(**fee_type.model_dump())
+    db.add(new_fee_type)
     db.commit()
-    db.refresh(new_role)
-    return new_role
+    db.refresh(new_fee_type)
+    return new_fee_type
 
+@router.get("/", response_model=list[FeeTypeOut])
+def list_fee_types(db: Session = Depends(get_db)):
+    return db.query(FeeType).all()
 
-@router.get("/", response_model=list[RoleOut])
-def list_roles(db: Session = Depends(get_db)):
-    return db.query(Role).all()
+@router.get("/{fee_type_id}", response_model=FeeTypeOut)
+def get_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
+    fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
+    if not fee_type:
+        raise HTTPException(status_code=404, detail="Fee type not found")
+    return fee_type
 
+@router.put("/{fee_type_id}", response_model=FeeTypeOut)
+def update_fee_type(fee_type_id: int, data: FeeTypeCreate, db: Session = Depends(get_db)):
+    fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
+    if not fee_type:
+        raise HTTPException(status_code=404, detail="Fee type not found")
 
-@router.get("/{role_id}", response_model=RoleOut)
-def get_role(role_id: int, db: Session = Depends(get_db)):
-    role = db.query(Role).filter(Role.id == role_id).first()
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
-    return role
-
-
-@router.put("/{role_id}", response_model=RoleOut)
-def update_role(role_id: int, role_data: RoleCreate, db: Session = Depends(get_db)):
-    role = db.query(Role).filter(Role.id == role_id).first()
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
-
-    for field, value in role_data.model_dump().items():
-        setattr(role, field, value)
+    for field, value in data.model_dump().items():
+        setattr(fee_type, field, value)
 
     db.commit()
-    db.refresh(role)
-    return role
+    db.refresh(fee_type)
+    return fee_type
 
+@router.delete("/{fee_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
+    fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
+    if not fee_type:
+        raise HTTPException(status_code=404, detail="Fee type not found")
 
-@router.delete("/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_role(role_id: int, db: Session = Depends(get_db)):
-    role = db.query(Role).filter(Role.id == role_id).first()
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
-
-    db.delete(role)
-    commit_or_409(db, "Cannot delete this role — one or more users still reference it")
+    db.delete(fee_type)
+    commit_or_409(db, "Cannot delete this fee type — one or more fee records still reference it")

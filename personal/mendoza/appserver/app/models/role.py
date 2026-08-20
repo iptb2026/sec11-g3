@@ -1,9 +1,7 @@
 # ==== LAYER 1: Foundation & Reference Data ====
 from sqlalchemy import Column, BigInteger, String, Text, TIMESTAMP
 from sqlalchemy.sql import func
-
 from app.database.session import Base
-
 
 class Role(Base):
     __tablename__ = "roles"

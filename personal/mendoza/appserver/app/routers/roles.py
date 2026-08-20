@@ -1,14 +1,12 @@
 # ==== LAYER 1: Foundation & Reference Data ====
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
 from app.core.db_utils import commit_or_409
 from app.database.session import get_db
 from app.models.role import Role
 from app.schemas.role import RoleCreate, RoleOut
 
 router = APIRouter(prefix="/roles", tags=["Layer 1 - Roles"])
-
 
 @router.post("/", response_model=RoleOut, status_code=status.HTTP_201_CREATED)
 def create_role(role: RoleCreate, db: Session = Depends(get_db)):
@@ -22,11 +20,9 @@ def create_role(role: RoleCreate, db: Session = Depends(get_db)):
     db.refresh(new_role)
     return new_role
 
-
 @router.get("/", response_model=list[RoleOut])
 def list_roles(db: Session = Depends(get_db)):
     return db.query(Role).all()
-
 
 @router.get("/{role_id}", response_model=RoleOut)
 def get_role(role_id: int, db: Session = Depends(get_db)):
@@ -34,7 +30,6 @@ def get_role(role_id: int, db: Session = Depends(get_db)):
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
     return role
-
 
 @router.put("/{role_id}", response_model=RoleOut)
 def update_role(role_id: int, role_data: RoleCreate, db: Session = Depends(get_db)):
@@ -48,7 +43,6 @@ def update_role(role_id: int, role_data: RoleCreate, db: Session = Depends(get_d
     db.commit()
     db.refresh(role)
     return role
-
 
 @router.delete("/{role_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_role(role_id: int, db: Session = Depends(get_db)):
