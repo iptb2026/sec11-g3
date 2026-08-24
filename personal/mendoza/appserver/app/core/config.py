@@ -4,7 +4,7 @@ class Settings:
     DB_PASSWORD: str = "1234"
     DB_HOST: str = "172.17.100.14"
     DB_PORT: int = 3306
-    DB_NAME: str = "db"
+    DB_NAME: str = "mendoza"
 
     @property
     def DATABASE_URL(self) -> str:
@@ -13,12 +13,8 @@ class Settings:
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 
-    @property
-    def DATABASE_URL(self) -> str:
-        return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-
     # --- JWT ---
-    SECRET_KEY: str = "f5f6cfcb44c92deaffbeae47dca73bb6b209f35ad226df224af0c235a33090c6"
+    SECRET_KEY: str = "f5f6cfcb44c92deaffbeae47dca73bb6b209f35ad226df224af0c235a33090c"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 

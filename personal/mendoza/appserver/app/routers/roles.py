@@ -36,10 +36,8 @@ def update_role(role_id: int, role_data: RoleCreate, db: Session = Depends(get_d
     role = db.query(Role).filter(Role.id == role_id).first()
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
-
     for field, value in role_data.model_dump().items():
         setattr(role, field, value)
-
     db.commit()
     db.refresh(role)
     return role
@@ -49,6 +47,5 @@ def delete_role(role_id: int, db: Session = Depends(get_db)):
     role = db.query(Role).filter(Role.id == role_id).first()
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
-
     db.delete(role)
     commit_or_409(db, "Cannot delete this role — one or more users still reference it")
