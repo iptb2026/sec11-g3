@@ -8,7 +8,10 @@ from app.schemas.account_type import AccountTypeCreate, AccountTypeOut
 
 router = APIRouter(prefix="/account-types", tags=["Layer 1 - Account Types"])
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/b_mendozak
 @router.post("/", response_model=AccountTypeOut, status_code=status.HTTP_201_CREATED)
 def create_account_type(account_type: AccountTypeCreate, db: Session = Depends(get_db)):
     existing = db.query(AccountType).filter(AccountType.type_code == account_type.type_code).first()
@@ -21,12 +24,30 @@ def create_account_type(account_type: AccountTypeCreate, db: Session = Depends(g
     db.refresh(new_account_type)
     return new_account_type
 
-
 @router.get("/", response_model=list[AccountTypeOut])
 def list_account_types(db: Session = Depends(get_db)):
     return db.query(AccountType).all()
 
+<<<<<<< HEAD
+@router.get("/", response_model=list[AccountTypeOut])
+def list_account_types(db: Session = Depends(get_db)):
+    return db.query(AccountType).all()
+=======
+@router.get("/{account_type_id}", response_model=AccountTypeOut)
+def get_account_type(account_type_id: int, db: Session = Depends(get_db)):
+    account_type = db.query(AccountType).filter(AccountType.id == account_type_id).first()
+    if not account_type:
+        raise HTTPException(status_code=404, detail="Account type not found")
+    return account_type
+>>>>>>> origin/b_mendozak
 
+@router.put("/{account_type_id}", response_model=AccountTypeOut)
+def update_account_type(account_type_id: int, data: AccountTypeCreate, db: Session = Depends(get_db)):
+    account_type = db.query(AccountType).filter(AccountType.id == account_type_id).first()
+    if not account_type:
+        raise HTTPException(status_code=404, detail="Account type not found")
+
+<<<<<<< HEAD
 @router.get("/{account_type_id}", response_model=AccountTypeOut)
 def get_account_type(account_type_id: int, db: Session = Depends(get_db)):
     account_type = db.query(AccountType).filter(AccountType.id == account_type_id).first()
@@ -41,6 +62,8 @@ def update_account_type(account_type_id: int, data: AccountTypeCreate, db: Sessi
     if not account_type:
         raise HTTPException(status_code=404, detail="Account type not found")
 
+=======
+>>>>>>> origin/b_mendozak
     for field, value in data.model_dump().items():
         setattr(account_type, field, value)
 
@@ -48,12 +71,20 @@ def update_account_type(account_type_id: int, data: AccountTypeCreate, db: Sessi
     db.refresh(account_type)
     return account_type
 
-
 @router.delete("/{account_type_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_account_type(account_type_id: int, db: Session = Depends(get_db)):
     account_type = db.query(AccountType).filter(AccountType.id == account_type_id).first()
     if not account_type:
         raise HTTPException(status_code=404, detail="Account type not found")
 
+<<<<<<< HEAD
+@router.delete("/{account_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_account_type(account_type_id: int, db: Session = Depends(get_db)):
+    account_type = db.query(AccountType).filter(AccountType.id == account_type_id).first()
+    if not account_type:
+        raise HTTPException(status_code=404, detail="Account type not found")
+
+=======
+>>>>>>> origin/b_mendozak
     db.delete(account_type)
     commit_or_409(db, "Cannot delete this account type — one or more accounts still reference it")

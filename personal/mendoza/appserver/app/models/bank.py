@@ -3,7 +3,6 @@ from sqlalchemy import Column, BigInteger, String, Enum, TIMESTAMP
 from sqlalchemy.sql import func
 from app.database.session import Base
 
-
 class Bank(Base):
     __tablename__ = "banks"
 

@@ -8,7 +8,10 @@ from app.schemas.fee_type import FeeTypeCreate, FeeTypeOut
 
 router = APIRouter(prefix="/fee-types", tags=["Layer 1 - Fee Types"])
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/b_mendozak
 @router.post("/", response_model=FeeTypeOut, status_code=status.HTTP_201_CREATED)
 def create_fee_type(fee_type: FeeTypeCreate, db: Session = Depends(get_db)):
     existing = db.query(FeeType).filter(FeeType.fee_code == fee_type.fee_code).first()
@@ -21,12 +24,30 @@ def create_fee_type(fee_type: FeeTypeCreate, db: Session = Depends(get_db)):
     db.refresh(new_fee_type)
     return new_fee_type
 
-
 @router.get("/", response_model=list[FeeTypeOut])
 def list_fee_types(db: Session = Depends(get_db)):
     return db.query(FeeType).all()
 
+<<<<<<< HEAD
+@router.get("/", response_model=list[FeeTypeOut])
+def list_fee_types(db: Session = Depends(get_db)):
+    return db.query(FeeType).all()
+=======
+@router.get("/{fee_type_id}", response_model=FeeTypeOut)
+def get_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
+    fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
+    if not fee_type:
+        raise HTTPException(status_code=404, detail="Fee type not found")
+    return fee_type
+>>>>>>> origin/b_mendozak
 
+@router.put("/{fee_type_id}", response_model=FeeTypeOut)
+def update_fee_type(fee_type_id: int, data: FeeTypeCreate, db: Session = Depends(get_db)):
+    fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
+    if not fee_type:
+        raise HTTPException(status_code=404, detail="Fee type not found")
+
+<<<<<<< HEAD
 @router.get("/{fee_type_id}", response_model=FeeTypeOut)
 def get_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
     fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
@@ -41,6 +62,8 @@ def update_fee_type(fee_type_id: int, data: FeeTypeCreate, db: Session = Depends
     if not fee_type:
         raise HTTPException(status_code=404, detail="Fee type not found")
 
+=======
+>>>>>>> origin/b_mendozak
     for field, value in data.model_dump().items():
         setattr(fee_type, field, value)
 
@@ -48,12 +71,20 @@ def update_fee_type(fee_type_id: int, data: FeeTypeCreate, db: Session = Depends
     db.refresh(fee_type)
     return fee_type
 
-
 @router.delete("/{fee_type_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
     fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
     if not fee_type:
         raise HTTPException(status_code=404, detail="Fee type not found")
 
+<<<<<<< HEAD
+@router.delete("/{fee_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
+    fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
+    if not fee_type:
+        raise HTTPException(status_code=404, detail="Fee type not found")
+
+=======
+>>>>>>> origin/b_mendozak
     db.delete(fee_type)
     commit_or_409(db, "Cannot delete this fee type — one or more fee records still reference it")

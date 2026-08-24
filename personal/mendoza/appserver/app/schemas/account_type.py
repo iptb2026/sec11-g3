@@ -3,7 +3,6 @@ from datetime import datetime
 from decimal import Decimal
 from pydantic import BaseModel
 
-
 class AccountTypeCreate(BaseModel):
     type_code: str
     type_name: str
@@ -11,7 +10,6 @@ class AccountTypeCreate(BaseModel):
     opening_deposit: Decimal = Decimal("0.00")
     annual_interest_rate: Decimal = Decimal("0.00")
     daily_withdrawal_limit: Decimal = Decimal("0.00")
-
 
 class AccountTypeOut(BaseModel):
     id: int
