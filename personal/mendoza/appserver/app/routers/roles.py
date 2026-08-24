@@ -1,7 +1,6 @@
 # ==== LAYER 1: Foundation & Reference Data ====
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
 from app.core.db_utils import commit_or_409
 from app.database.session import get_db
 from app.models.role import Role

@@ -1,7 +1,6 @@
 # ==== LAYER 1: Foundation & Reference Data ====
 from sqlalchemy import Column, BigInteger, String, Text, DECIMAL, TIMESTAMP
 from sqlalchemy.sql import func
-
 from app.database.session import Base
 
 
