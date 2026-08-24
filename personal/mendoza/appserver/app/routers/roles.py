@@ -2,11 +2,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.db_utils import commit_or_409
+from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.role import Role
 from app.schemas.role import RoleCreate, RoleOut
 
-router = APIRouter(prefix="/roles", tags=["Layer 1 - Roles"])
+router = APIRouter(
+    prefix="/roles",
+    tags=["Layer 1 - Roles"],
+    dependencies=[Depends(get_current_user)]
+)
 
 @router.post("/", response_model=RoleOut, status_code=status.HTTP_201_CREATED)
 def create_role(role: RoleCreate, db: Session = Depends(get_db)):

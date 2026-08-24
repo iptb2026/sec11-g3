@@ -2,11 +2,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.db_utils import commit_or_409
+from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account_type import AccountType
 from app.schemas.account_type import AccountTypeCreate, AccountTypeOut
 
-router = APIRouter(prefix="/account-types", tags=["Layer 1 - Account Types"])
+router = APIRouter(
+    prefix="/account-types",
+    tags=["Layer 1 - Account Types"],
+    dependencies=[Depends(get_current_user)]
+)
 
 @router.post("/", response_model=AccountTypeOut, status_code=status.HTTP_201_CREATED)
 def create_account_type(account_type: AccountTypeCreate, db: Session = Depends(get_db)):

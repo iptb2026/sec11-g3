@@ -5,8 +5,13 @@ from app.core.db_utils import commit_or_409
 from app.database.session import get_db
 from app.models.bank import Bank
 from app.schemas.bank import BankCreate, BankOut
+from app.core.security import get_current_user
 
-router = APIRouter(prefix="/banks", tags=["Layer 1 - Banks"])
+router = APIRouter(
+    prefix="/banks",
+    tags=["Layer 1 - Banks"],
+    dependencies=[Depends(get_current_user)]
+)
 
 @router.post("/", response_model=BankOut, status_code=status.HTTP_201_CREATED)
 def create_bank(bank: BankCreate, db: Session = Depends(get_db)):

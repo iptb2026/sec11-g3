@@ -5,8 +5,13 @@ from app.core.db_utils import commit_or_409
 from app.database.session import get_db
 from app.models.fee_type import FeeType
 from app.schemas.fee_type import FeeTypeCreate, FeeTypeOut
+from app.core.security import get_current_user
 
-router = APIRouter(prefix="/fee-types", tags=["Layer 1 - Fee Types"])
+router = APIRouter(
+    prefix="/fee-types",
+    tags=["Layer 1 - Fee Types"],
+    dependencies=[Depends(get_current_user)]
+)
 
 @router.post("/", response_model=FeeTypeOut, status_code=status.HTTP_201_CREATED)
 def create_fee_type(fee_type: FeeTypeCreate, db: Session = Depends(get_db)):
@@ -40,3 +45,18 @@ def update_fee_type(fee_type_id: int, data: FeeTypeCreate, db: Session = Depends
     db.commit()
     db.refresh(fee_type)
     return fee_type
+
+
+@router.delete("/{fee_type_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
+    fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
+
+    if not fee_type:
+        raise HTTPException(status_code=404, detail="Fee type not found")
+
+    db.delete(fee_type)
+
+    commit_or_409(
+        db,
+        "Cannot delete this fee type — one or more accounts or transactions still reference it"
+    )
