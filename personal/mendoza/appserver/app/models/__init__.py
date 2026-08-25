@@ -20,4 +20,10 @@ from app.models.withdrawal import Withdrawal
 from app.models.transfer import Transfer
 from app.models.interbank_transfer import InterbankTransfer
 
+# ==== LAYER 5: Financial Records & Ledger ====
+from app.models.fee_record import FeeRecord
+from app.models.interest_record import InterestRecord
+from app.models.ledger_entry import LedgerEntry
+
+
 

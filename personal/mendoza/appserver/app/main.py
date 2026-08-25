@@ -20,6 +20,9 @@ from app.routers import (
     withdrawals,
     transfers,
     interbank_transfers,
+    fee_records,
+    interest_records,
+    ledger_entries,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -51,6 +54,11 @@ app.include_router(deposits.router)
 app.include_router(withdrawals.router)
 app.include_router(transfers.router)
 app.include_router(interbank_transfers.router)
+
+# ==== LAYER 5 ====
+app.include_router(fee_records.router)
+app.include_router(interest_records.router)
+app.include_router(ledger_entries.router)
 
 app.add_middleware(
     CORSMiddleware,
