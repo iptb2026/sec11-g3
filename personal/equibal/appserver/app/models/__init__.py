@@ -12,3 +12,9 @@ from app.models.audit_log import AuditLog
 from app.models.account import Account
 from app.models.withdrawal_limit import WithdrawalLimit
 from app.models.interest_policy import InterestPolicy
+
+# ==== LAYER 4: Transactions ====
+from app.models.deposit import Deposit
+from app.models.withdrawal import Withdrawal
+from app.models.transfer import Transfer
+from app.models.interbank_transfer import InterbankTransfer
