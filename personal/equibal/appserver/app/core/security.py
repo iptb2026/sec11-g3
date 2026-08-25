@@ -1,56 +1,49 @@
-from fastapi import FastAPI
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
 from app.core.config import settings
-from app.database.session import Base, engine
 
-# ==== LAYER 1: Foundation & Reference Data ====
-from app.routers import roles, account_types, banks, fee_types
+# Tool for hashing passwords
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# ==== LAYER 2: Identity & Access ====
-from app.routers import users, auth, sessions, audit_logs
+# Tells FastAPI where users log in to get a token
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# ==== LAYER 3: Account Configuration ====
-from app.routers import accounts, withdrawal_limits, interest_policies
 
-# ==== LAYER 4: Transactions ====
-from app.routers import deposits, withdrawals, transfers, interbank_transfers
+# --- PASSWORD FUNCTIONS ---
 
-# ==== LAYER 5: Financial Records & Ledger ====
-from app.routers import fee_records, interest_records, ledger_entries
+def hash_password(password: str) -> str:
+    """Turn a plain password into a hash before saving to the database."""
+    return pwd_context.hash(password)
 
-# Creates tables if they don't already exist
-Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
+def check_password(plain_password: str, hashed_password: str) -> bool:
+    """Compare a plain password with the stored hash. Returns True or False."""
+    return pwd_context.verify(plain_password, hashed_password)
 
-# ==== LAYER 1: Foundation & Reference Data ====
-app.include_router(roles.router)
-app.include_router(account_types.router)
-app.include_router(banks.router)
-app.include_router(fee_types.router)
 
-# ==== LAYER 2: Identity & Access ====
-app.include_router(users.router)
-app.include_router(auth.router)
-app.include_router(sessions.router)
-app.include_router(audit_logs.router)
+# --- JWT TOKEN FUNCTIONS ---
 
-# ==== LAYER 3: Account Configuration ====
-app.include_router(accounts.router)
-app.include_router(withdrawal_limits.router)
-app.include_router(interest_policies.router)
+def create_token(username: str) -> str:
+    """Create a JWT token for a logged-in user. No expiry."""
+    data = {"sub": username}
+    return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-# ==== LAYER 4: Transactions ====
-app.include_router(deposits.router)
-app.include_router(withdrawals.router)
-app.include_router(transfers.router)
-app.include_router(interbank_transfers.router)
 
-# ==== LAYER 5: Financial Records & Ledger ====
-app.include_router(fee_records.router)
-app.include_router(interest_records.router)
-app.include_router(ledger_entries.router)
-
-@app.get("/", tags=["Health"])
-def root():
-    return {"status": "ok", "app": settings.APP_NAME}
+def get_current_user(token: str = Depends(oauth2_scheme)) -> str:
+    """
+    Used inside protected routes.
+    FastAPI automatically grabs the token from the request header
+    and passes it here. If valid, returns the username.
+    If invalid or expired, stops the request with a 401 error.
+    """
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        return username
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
