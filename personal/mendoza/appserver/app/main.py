@@ -13,6 +13,13 @@ from app.routers import (
     auth,
     sessions,
     audit_logs,
+    accounts,
+    withdrawal_limits,
+    interest_policies,
+    deposits,
+    withdrawals,
+    transfers,
+    interbank_transfers,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -33,6 +40,17 @@ app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(sessions.router)
 app.include_router(audit_logs.router)
+
+# ==== LAYER 3 ====
+app.include_router(accounts.router)
+app.include_router(withdrawal_limits.router)
+app.include_router(interest_policies.router)
+
+# ==== LAYER 4 ====
+app.include_router(deposits.router)
+app.include_router(withdrawals.router)
+app.include_router(transfers.router)
+app.include_router(interbank_transfers.router)
 
 app.add_middleware(
     CORSMiddleware,
