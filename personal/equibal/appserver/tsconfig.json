@@ -1,0 +1,23 @@
+{
+  "extends": "./.quasar/tsconfig.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "allowJs": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "include": [
+    "app/**/*.js",
+    "app/**/*.ts",
+    "app/**/*.vue",
+    "app/frontend/shims-vue.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

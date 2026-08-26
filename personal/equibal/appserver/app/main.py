@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.database.session import Base, engine
@@ -25,6 +26,17 @@ from app.routers import fee_records, interest_records, ledger_entries
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
+
+# The role-based walkthrough is served from the same origin as the API.
+app.mount("/equibal/web", StaticFiles(directory="app/frontend", html=True), name="equibal_web")
+app.mount("/equibal/frontend", StaticFiles(directory="app/frontend", html=True), name="equibal_frontend")
+app.mount("/web", StaticFiles(directory="app/frontend", html=True), name="web")
+app.mount("/frontend", StaticFiles(directory="app/frontend", html=True), name="frontend")
+
+@app.get("/equibal/openapi.json", include_in_schema=False)
+@app.get("/equibal/equibal/openapi.json", include_in_schema=False)
+def openapi_fallback():
+    return app.openapi()
 
 # ==== LAYER 1: Foundation & Reference Data ====
 app.include_router(roles.router)
@@ -56,4 +68,4 @@ app.include_router(ledger_entries.router)
 
 @app.get("/", tags=["Health"])
 def root():
-    return {"status": "ok", "app": settings.APP_NAME}
+    return {"status": "ok", "app": settings.APP_NAME, "frontend": "/frontend/"}

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": true,
+    "allowJs": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "include": [
+    "app/**/*.js",
+    "app/**/*.ts",
+    "app/**/*.vue",
+    "app/frontend/shims-vue.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
