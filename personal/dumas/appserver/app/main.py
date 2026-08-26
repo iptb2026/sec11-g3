@@ -20,5 +20,4 @@ app.include_router(fee_types.router)
 
 @app.get("/", tags=["Health"])
 def root():
-    return {"status": "ok", "app": settings.APP_NAME}
-    
+    return {"status": "ok", "app": settings.APP_NAME}  

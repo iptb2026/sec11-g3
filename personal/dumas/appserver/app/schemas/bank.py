@@ -28,4 +28,3 @@ class BankOut(BaseModel):
 
     class Config:
         from_attributes = True
-        
