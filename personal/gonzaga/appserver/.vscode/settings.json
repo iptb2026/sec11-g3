@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "/opt/virt/bin/python",
+    "python.analysis.extraPaths": [
+        "/opt/virt/lib/python3.12/site-packages"
+    ]
+}

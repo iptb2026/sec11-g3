@@ -1,0 +1,5 @@
+{
+    "venvPath": "/opt",
+    "venv": "virt",
+    "typeCheckingMode": "basic"
+}
