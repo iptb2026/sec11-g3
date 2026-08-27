@@ -1,0 +1,57 @@
+nohup: ignoring input
+INFO:     Will watch for changes in these directories: ['/home/admin/sec11-g3/personal/carbonilla/appserver']
+INFO:     Uvicorn running on http://0.0.0.0:5006 (Press CTRL+C to quit)
+INFO:     Started reloader process [60405] using WatchFiles
+INFO:     Started server process [60424]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:60094 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "GET /carbonilla/roles/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "GET /carbonilla/roles/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "GET /carbonilla/roles/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47512 - "POST /carbonilla/auth/login HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:47518 - "POST /carbonilla/carbonilla/auth/login HTTP/1.1" 404 Not Found
+INFO:     172.17.0.1:0 - "GET /carbonilla/-wui/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52780 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57388 - "HEAD /carbonilla/-wui/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:0 - "HEAD /carbonilla/-wui/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:35546 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59004 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/roles/1 HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/roles/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/accounts/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/banks/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/roles/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/account-types/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/roles/1 HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/accounts/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/roles/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/banks/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/roles/2 HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/accounts/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/withdrawals/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/deposits/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/interbank-transfers/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "POST /carbonilla/auth/login HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/users/ HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/roles/3 HTTP/1.1" 200 OK
+INFO:     172.17.0.1:0 - "GET /carbonilla/accounts/ HTTP/1.1" 200 OK
