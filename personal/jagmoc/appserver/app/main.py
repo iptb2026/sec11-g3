@@ -21,7 +21,17 @@ from app.routers import fee_records, interest_records, ledger_entries
 # Creates tables if they don't already exist
 Base.metadata.create_all(bind=engine)
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ==== LAYER 1: Foundation & Reference Data ====
 app.include_router(roles.router)
