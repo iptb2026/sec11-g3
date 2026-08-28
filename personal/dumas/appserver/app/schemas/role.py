@@ -20,4 +20,3 @@ class RoleOut(BaseModel):
 
     class Config:
         from_attributes = True
-        

@@ -58,4 +58,3 @@ def delete_role(role_id: int, db: Session = Depends(get_db)):
 
     db.delete(role)
     commit_or_409(db, "Cannot delete this role — one or more users still reference it")
-    
