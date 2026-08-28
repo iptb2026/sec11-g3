@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.database.session import Base, engine
@@ -19,40 +20,40 @@ from app.routers import deposits, withdrawals, transfers, interbank_transfers
 from app.routers import fee_records, interest_records, ledger_entries
 
 # Creates tables if they don't already exist
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Warning: Database initialization deferred (connection error: {e})")
+    
 
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
 
-# ==== LAYER 1: Foundation & Reference Data ====
-app.include_router(roles.router)
-app.include_router(account_types.router)
-app.include_router(banks.router)
-app.include_router(fee_types.router)
+# Enable CORS for frontend integration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=".*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# ==== LAYER 2: Identity & Access ====
-app.include_router(users.router)
-app.include_router(auth.router)
-app.include_router(sessions.router)
-app.include_router(audit_logs.router)
+all_routers = [
+    roles.router, account_types.router, banks.router, fee_types.router,
+    users.router, auth.router, sessions.router, audit_logs.router,
+    accounts.router, withdrawal_limits.router, interest_policies.router,
+    deposits.router, withdrawals.router, transfers.router, interbank_transfers.router,
+    fee_records.router, interest_records.router, ledger_entries.router
+]
 
-# ==== LAYER 3: Account Configuration ====
-app.include_router(accounts.router)
-app.include_router(withdrawal_limits.router)
-app.include_router(interest_policies.router)
-
-# ==== LAYER 4: Transactions ====
-app.include_router(deposits.router)
-app.include_router(withdrawals.router)
-app.include_router(transfers.router)
-app.include_router(interbank_transfers.router)
-
-# ==== LAYER 5: Financial Records & Ledger ====
-app.include_router(fee_records.router)
-app.include_router(interest_records.router)
-app.include_router(ledger_entries.router)
+for r in all_routers:
+    app.include_router(r)
+    app.include_router(r, prefix="/socnoben")
 
 
 @app.get("/", tags=["Health"])
+@app.get("/socnoben", tags=["Health"])
 def root():
     return {"status": "ok", "app": settings.APP_NAME}
+
+
 

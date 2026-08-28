@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 from app.database.session import Base
 
 class AccountType(Base):
-    __tablename__ = account_types
+    __tablename__ = "account_types"
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     type_code = Column(String(50), unique=True, nullable=False)
     type_name = Column(String(100), nullable=False)
