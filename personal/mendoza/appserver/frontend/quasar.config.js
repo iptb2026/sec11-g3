@@ -66,7 +66,14 @@ export default defineConfig((/* ctx */) => {
       // vueDevtools: true,
       // https: true,
       port: 9000,
-      open: false
+      open: false,
+      proxy: {
+        '^/mendoza(/.*)?$': {
+          target: 'http://127.0.0.1:5000',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/mendoza/, '')
+        }
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
