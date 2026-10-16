@@ -1,0 +1,167 @@
+nohup: ignoring input
+
+> banking-frontend@0.0.1 dev
+> quasar dev
+
+
+[38;2;25;118;210m [39m[38;2;28;117;207m█[39m[38;2;31;115;204m█[39m[38;2;34;114;201m█[39m[38;2;37;112;197m█[39m[38;2;40;111;194m█[39m[38;2;43;109;191m█[39m[38;2;45;108;188m╗[39m[38;2;48;106;185m [39m[38;2;51;105;182m█[39m[38;2;54;104;178m█[39m[38;2;57;102;175m╗[39m[38;2;60;101;172m [39m[38;2;63;99;169m [39m[38;2;66;98;166m [39m[38;2;69;96;163m█[39m[38;2;72;95;159m█[39m[38;2;75;93;156m╗[39m[38;2;78;92;153m [39m[38;2;80;90;150m█[39m[38;2;83;89;147m█[39m[38;2;86;88;144m█[39m[38;2;89;86;140m█[39m[38;2;92;85;137m█[39m[38;2;95;83;134m╗[39m[38;2;98;82;131m [39m[38;2;101;80;128m█[39m[38;2;104;79;125m█[39m[38;2;107;77;121m█[39m[38;2;110;76;118m█[39m[38;2;113;75;115m█[39m[38;2;115;73;112m█[39m[38;2;118;72;109m█[39m[38;2;121;70;106m╗[39m[38;2;124;69;102m [39m[38;2;127;67;99m█[39m[38;2;130;66;96m█[39m[38;2;133;64;93m█[39m[38;2;136;63;90m█[39m[38;2;139;61;87m█[39m[38;2;142;60;83m╗[39m[38;2;145;59;80m [39m[38;2;148;57;77m█[39m[38;2;150;56;74m█[39m[38;2;153;54;71m█[39m[38;2;156;53;68m█[39m[38;2;159;51;64m█[39m[38;2;162;50;61m█[39m[38;2;165;48;58m╗[39m
+[38;2;25;118;210m█[39m[38;2;28;117;207m█[39m[38;2;31;115;204m╔[39m[38;2;34;114;201m═[39m[38;2;37;112;197m═[39m[38;2;40;111;194m═[39m[38;2;43;109;191m█[39m[38;2;45;108;188m█[39m[38;2;48;106;185m╗[39m[38;2;51;105;182m█[39m[38;2;54;104;178m█[39m[38;2;57;102;175m║[39m[38;2;60;101;172m [39m[38;2;63;99;169m [39m[38;2;66;98;166m [39m[38;2;69;96;163m█[39m[38;2;72;95;159m█[39m[38;2;75;93;156m║[39m[38;2;78;92;153m█[39m[38;2;80;90;150m█[39m[38;2;83;89;147m╔[39m[38;2;86;88;144m═[39m[38;2;89;86;140m═[39m[38;2;92;85;137m█[39m[38;2;95;83;134m█[39m[38;2;98;82;131m╗[39m[38;2;101;80;128m█[39m[38;2;104;79;125m█[39m[38;2;107;77;121m╔[39m[38;2;110;76;118m═[39m[38;2;113;75;115m═[39m[38;2;115;73;112m═[39m[38;2;118;72;109m═[39m[38;2;121;70;106m╝[39m[38;2;124;69;102m█[39m[38;2;127;67;99m█[39m[38;2;130;66;96m╔[39m[38;2;133;64;93m═[39m[38;2;136;63;90m═[39m[38;2;139;61;87m█[39m[38;2;142;60;83m█[39m[38;2;145;59;80m╗[39m[38;2;148;57;77m█[39m[38;2;150;56;74m█[39m[38;2;153;54;71m╔[39m[38;2;156;53;68m═[39m[38;2;159;51;64m═[39m[38;2;162;50;61m█[39m[38;2;165;48;58m█[39m[38;2;168;47;55m╗[39m
+[38;2;25;118;210m█[39m[38;2;28;117;207m█[39m[38;2;31;115;204m║[39m[38;2;34;114;201m [39m[38;2;37;112;197m [39m[38;2;40;111;194m [39m[38;2;43;109;191m█[39m[38;2;45;108;188m█[39m[38;2;48;106;185m║[39m[38;2;51;105;182m█[39m[38;2;54;104;178m█[39m[38;2;57;102;175m║[39m[38;2;60;101;172m [39m[38;2;63;99;169m [39m[38;2;66;98;166m [39m[38;2;69;96;163m█[39m[38;2;72;95;159m█[39m[38;2;75;93;156m║[39m[38;2;78;92;153m█[39m[38;2;80;90;150m█[39m[38;2;83;89;147m█[39m[38;2;86;88;144m█[39m[38;2;89;86;140m█[39m[38;2;92;85;137m█[39m[38;2;95;83;134m█[39m[38;2;98;82;131m║[39m[38;2;101;80;128m█[39m[38;2;104;79;125m█[39m[38;2;107;77;121m█[39m[38;2;110;76;118m█[39m[38;2;113;75;115m█[39m[38;2;115;73;112m█[39m[38;2;118;72;109m█[39m[38;2;121;70;106m╗[39m[38;2;124;69;102m█[39m[38;2;127;67;99m█[39m[38;2;130;66;96m█[39m[38;2;133;64;93m█[39m[38;2;136;63;90m█[39m[38;2;139;61;87m█[39m[38;2;142;60;83m█[39m[38;2;145;59;80m║[39m[38;2;148;57;77m█[39m[38;2;150;56;74m█[39m[38;2;153;54;71m█[39m[38;2;156;53;68m█[39m[38;2;159;51;64m█[39m[38;2;162;50;61m█[39m[38;2;165;48;58m╔[39m[38;2;168;47;55m╝[39m
+[38;2;25;118;210m█[39m[38;2;28;117;207m█[39m[38;2;31;115;204m║[39m[38;2;34;114;201m▄[39m[38;2;37;112;197m▄[39m[38;2;40;111;194m [39m[38;2;43;109;191m█[39m[38;2;45;108;188m█[39m[38;2;48;106;185m║[39m[38;2;51;105;182m█[39m[38;2;54;104;178m█[39m[38;2;57;102;175m║[39m[38;2;60;101;172m [39m[38;2;63;99;169m [39m[38;2;66;98;166m [39m[38;2;69;96;163m█[39m[38;2;72;95;159m█[39m[38;2;75;93;156m║[39m[38;2;78;92;153m█[39m[38;2;80;90;150m█[39m[38;2;83;89;147m╔[39m[38;2;86;88;144m═[39m[38;2;89;86;140m═[39m[38;2;92;85;137m█[39m[38;2;95;83;134m█[39m[38;2;98;82;131m║[39m[38;2;101;80;128m╚[39m[38;2;104;79;125m═[39m[38;2;107;77;121m═[39m[38;2;110;76;118m═[39m[38;2;113;75;115m═[39m[38;2;115;73;112m█[39m[38;2;118;72;109m█[39m[38;2;121;70;106m║[39m[38;2;124;69;102m█[39m[38;2;127;67;99m█[39m[38;2;130;66;96m╔[39m[38;2;133;64;93m═[39m[38;2;136;63;90m═[39m[38;2;139;61;87m█[39m[38;2;142;60;83m█[39m[38;2;145;59;80m║[39m[38;2;148;57;77m█[39m[38;2;150;56;74m█[39m[38;2;153;54;71m╔[39m[38;2;156;53;68m═[39m[38;2;159;51;64m═[39m[38;2;162;50;61m█[39m[38;2;165;48;58m█[39m[38;2;168;47;55m╗[39m
+[38;2;25;118;210m╚[39m[38;2;28;117;207m█[39m[38;2;31;115;204m█[39m[38;2;34;114;201m█[39m[38;2;37;112;197m█[39m[38;2;40;111;194m█[39m[38;2;43;109;191m█[39m[38;2;45;108;188m╔[39m[38;2;48;106;185m╝[39m[38;2;51;105;182m╚[39m[38;2;54;104;178m█[39m[38;2;57;102;175m█[39m[38;2;60;101;172m█[39m[38;2;63;99;169m█[39m[38;2;66;98;166m█[39m[38;2;69;96;163m█[39m[38;2;72;95;159m╔[39m[38;2;75;93;156m╝[39m[38;2;78;92;153m█[39m[38;2;80;90;150m█[39m[38;2;83;89;147m║[39m[38;2;86;88;144m [39m[38;2;89;86;140m [39m[38;2;92;85;137m█[39m[38;2;95;83;134m█[39m[38;2;98;82;131m║[39m[38;2;101;80;128m█[39m[38;2;104;79;125m█[39m[38;2;107;77;121m█[39m[38;2;110;76;118m█[39m[38;2;113;75;115m█[39m[38;2;115;73;112m█[39m[38;2;118;72;109m█[39m[38;2;121;70;106m║[39m[38;2;124;69;102m█[39m[38;2;127;67;99m█[39m[38;2;130;66;96m║[39m[38;2;133;64;93m [39m[38;2;136;63;90m [39m[38;2;139;61;87m█[39m[38;2;142;60;83m█[39m[38;2;145;59;80m║[39m[38;2;148;57;77m█[39m[38;2;150;56;74m█[39m[38;2;153;54;71m║[39m[38;2;156;53;68m [39m[38;2;159;51;64m [39m[38;2;162;50;61m█[39m[38;2;165;48;58m█[39m[38;2;168;47;55m║[39m
+[38;2;25;118;210m [39m[38;2;28;117;207m╚[39m[38;2;31;115;204m═[39m[38;2;34;114;201m═[39m[38;2;37;112;197m▀[39m[38;2;40;111;194m▀[39m[38;2;43;109;191m═[39m[38;2;45;108;188m╝[39m[38;2;48;106;185m [39m[38;2;51;105;182m [39m[38;2;54;104;178m╚[39m[38;2;57;102;175m═[39m[38;2;60;101;172m═[39m[38;2;63;99;169m═[39m[38;2;66;98;166m═[39m[38;2;69;96;163m═[39m[38;2;72;95;159m╝[39m[38;2;75;93;156m [39m[38;2;78;92;153m╚[39m[38;2;80;90;150m═[39m[38;2;83;89;147m╝[39m[38;2;86;88;144m [39m[38;2;89;86;140m [39m[38;2;92;85;137m╚[39m[38;2;95;83;134m═[39m[38;2;98;82;131m╝[39m[38;2;101;80;128m╚[39m[38;2;104;79;125m═[39m[38;2;107;77;121m═[39m[38;2;110;76;118m═[39m[38;2;113;75;115m═[39m[38;2;115;73;112m═[39m[38;2;118;72;109m═[39m[38;2;121;70;106m╝[39m[38;2;124;69;102m╚[39m[38;2;127;67;99m═[39m[38;2;130;66;96m╝[39m[38;2;133;64;93m [39m[38;2;136;63;90m [39m[38;2;139;61;87m╚[39m[38;2;142;60;83m═[39m[38;2;145;59;80m╝[39m[38;2;148;57;77m╚[39m[38;2;150;56;74m═[39m[38;2;153;54;71m╝[39m[38;2;156;53;68m [39m[38;2;159;51;64m [39m[38;2;162;50;61m╚[39m[38;2;165;48;58m═[39m[38;2;168;47;55m╝[39m
+
+ App • Compiling quasar.config.js (no env prefix; dotenv files: .env)...
+ App •  TIP  • 🚀  You (or an AE) specified an explicit quasar.config file > devServer > port. It is recommended to use a different devServer > port for each Quasar mode to avoid browser cache issues. Example: ctx.mode.ssr ? 9100 : ...
+ App • Env • Client code prefix: QCLI_; dotenv files: .env
+
+ » Reported at............ 8/28/2026 8:09:38 AM
+ » App dir................ /home/admin/sec11-g3/personal/socnoben/frontend
+ » App URL................ http://localhost:9004/
+                           http://172.17.0.2:9004/
+ » Dev mode............... SPA
+ » Pkg quasar............. v2.27.0
+ » Pkg @quasar/app-vite... v3.8.1
+ » Browser target......... baseline-widely-available
+
+8:11:01 AM [vite] Internal server error: Error parsing JavaScript expression: Unexpected token, expected "," (1:6)
+  Plugin: vite:vue
+  File: /home/admin/sec11-g3/personal/socnoben/frontend/src/layouts/MainLayout.vue:65:19
+  63 |            to="/admin/roles"
+  64 |            :disable="!auth.isAdmin"
+  65 |            :class="{text-grey-5: !auth.isAdmin}"
+     |                     ^
+  66 |            active-class="bg-blue-1 text-primary text-weight-bold"
+  67 |          >
+      at createCompilerError (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)
+      at emitError (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3035:5)
+      at createExp (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3028:7)
+      at Object.onattribend (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2553:29)
+      at Tokenizer.handleInAttrValue (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:959:16)
+      at Tokenizer.stateInAttrValueDoubleQuotes (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:969:10)
+      at Tokenizer.parse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1113:16)
+      at Object.baseParse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3074:13)
+      at Object.parse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:913:23)
+      at Object.parse$1 [as parse] (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1849:24)
+8:11:01 AM [vite] (client) [console.warn] [VUE_ROUTER_R0010] Uncaught error during route navigation
+╰▶ fix: Register an error handler with `router.onError()` to handle navigation errors.
+8:11:01 AM [vite] (client) [console.error] TypeError: Failed to fetch dynamically imported module: http://localhost:9004/src/layouts/MainLayout.vue
+8:11:01 AM [vite] (client) [Unhandled rejection] TypeError: Failed to fetch dynamically imported module: http://localhost:9004/src/layouts/MainLayout.vue
+
+8:11:16 AM [vite] Internal server error: Error parsing JavaScript expression: Unexpected token, expected "," (1:6)
+  Plugin: vite:vue
+  File: /home/admin/sec11-g3/personal/socnoben/frontend/src/layouts/MainLayout.vue:65:19
+  63 |            to="/admin/roles"
+  64 |            :disable="!auth.isAdmin"
+  65 |            :class="{text-grey-5: !auth.isAdmin}"
+     |                     ^
+  66 |            active-class="bg-blue-1 text-primary text-weight-bold"
+  67 |          >
+      at createCompilerError (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)
+      at emitError (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3035:5)
+      at createExp (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3028:7)
+      at Object.onattribend (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2553:29)
+      at Tokenizer.handleInAttrValue (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:959:16)
+      at Tokenizer.stateInAttrValueDoubleQuotes (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:969:10)
+      at Tokenizer.parse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1113:16)
+      at Object.baseParse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3074:13)
+      at Object.parse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:913:23)
+      at Object.parse$1 [as parse] (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1849:24)
+8:11:17 AM [vite] (client) [console.warn] [VUE_ROUTER_R0010] Uncaught error during route navigation
+╰▶ fix: Register an error handler with `router.onError()` to handle navigation errors.
+8:11:17 AM [vite] (client) [console.error] TypeError: Failed to fetch dynamically imported module: http://localhost:9004/src/layouts/MainLayout.vue
+8:11:17 AM [vite] (client) [console.warn] [VUE_ROUTER_R0011] Unexpected error when starting the router:
+╰▶ fix: Inspect the actual cause; a navigation guard or async component likely threw during the initial navigation.
+8:11:20 AM [vite] Internal server error: Error parsing JavaScript expression: Unexpected token, expected "," (1:6)
+  Plugin: vite:vue
+  File: /home/admin/sec11-g3/personal/socnoben/frontend/src/layouts/MainLayout.vue:65:19
+  63 |            to="/admin/roles"
+  64 |            :disable="!auth.isAdmin"
+  65 |            :class="{text-grey-5: !auth.isAdmin}"
+     |                     ^
+  66 |            active-class="bg-blue-1 text-primary text-weight-bold"
+  67 |          >
+      at createCompilerError (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)
+      at emitError (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3035:5)
+      at createExp (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3028:7)
+      at Object.onattribend (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2553:29)
+      at Tokenizer.handleInAttrValue (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:959:16)
+      at Tokenizer.stateInAttrValueDoubleQuotes (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:969:10)
+      at Tokenizer.parse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1113:16)
+      at Object.baseParse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3074:13)
+      at Object.parse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:913:23)
+      at Object.parse$1 [as parse] (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1849:24)
+8:11:21 AM [vite] (client) [console.warn] [VUE_ROUTER_R0010] Uncaught error during route navigation
+╰▶ fix: Register an error handler with `router.onError()` to handle navigation errors.
+8:11:21 AM [vite] (client) [console.error] TypeError: Failed to fetch dynamically imported module: http://localhost:9004/src/layouts/MainLayout.vue
+8:11:21 AM [vite] (client) [console.warn] [VUE_ROUTER_R0011] Unexpected error when starting the router:
+╰▶ fix: Inspect the actual cause; a navigation guard or async component likely threw during the initial navigation.
+8:11:29 AM [vite] Internal server error: Error parsing JavaScript expression: Unexpected token, expected "," (1:6)
+  Plugin: vite:vue
+  File: /home/admin/sec11-g3/personal/socnoben/frontend/src/layouts/MainLayout.vue:65:19
+  63 |            to="/admin/roles"
+  64 |            :disable="!auth.isAdmin"
+  65 |            :class="{text-grey-5: !auth.isAdmin}"
+     |                     ^
+  66 |            active-class="bg-blue-1 text-primary text-weight-bold"
+  67 |          >
+      at createCompilerError (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)
+      at emitError (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3035:5)
+      at createExp (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3028:7)
+      at Object.onattribend (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2553:29)
+      at Tokenizer.handleInAttrValue (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:959:16)
+      at Tokenizer.stateInAttrValueDoubleQuotes (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:969:10)
+      at Tokenizer.parse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1113:16)
+      at Object.baseParse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3074:13)
+      at Object.parse (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:913:23)
+      at Object.parse$1 [as parse] (/home/admin/sec11-g3/personal/socnoben/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1849:24)
+8:11:30 AM [vite] (client) [console.warn] [VUE_ROUTER_R0010] Uncaught error during route navigation
+╰▶ fix: Register an error handler with `router.onError()` to handle navigation errors.
+8:11:30 AM [vite] (client) [console.error] TypeError: Failed to fetch dynamically imported module: http://localhost:9004/src/layouts/MainLayout.vue
+8:11:30 AM [vite] (client) [console.warn] [VUE_ROUTER_R0011] Unexpected error when starting the router:
+╰▶ fix: Inspect the actual cause; a navigation guard or async component likely threw during the initial navigation.
+8:59:07 AM [vite] http proxy error: /roles/
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:07 AM [vite] http proxy error: /accounts/
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:07 AM [vite] http proxy error: /users/
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:07 AM [vite] http proxy error: /banks/
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:35 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:41 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:45 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:45 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:46 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:46 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:46 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:47 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+8:59:47 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+9:20:41 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+9:21:01 AM [vite] http proxy error: /auth/login
+Error: connect ECONNREFUSED 127.0.0.1:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
