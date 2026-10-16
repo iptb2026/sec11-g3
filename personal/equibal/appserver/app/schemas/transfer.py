@@ -1,6 +1,7 @@
+# ==== LAYER 4: Transactions ====
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal, Optional
+from typing import Optional, Literal
 
 from pydantic import BaseModel, Field
 
@@ -8,7 +9,8 @@ from pydantic import BaseModel, Field
 class TransferCreate(BaseModel):
     source_account_id: int
     destination_account_id: int
-    transfer_reference: str
+    # Leave blank to let the server generate one (see app/core/references.py).
+    transfer_reference: Optional[str] = None
     amount: Decimal = Field(gt=0)
     transfer_type: Literal["INTERNAL", "SCHEDULED"] = "INTERNAL"
     remarks: Optional[str] = None

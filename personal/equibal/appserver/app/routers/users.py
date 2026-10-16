@@ -1,3 +1,4 @@
+# ==== LAYER 2: Identity & Access ====
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -6,7 +7,7 @@ from app.core.security import hash_password
 from app.database.session import get_db
 from app.models.role import Role
 from app.models.user import User
-from app.schemas.user import UserCreate, UserOut
+from app.schemas.user import UserCreate, UserUpdate, UserOut
 
 router = APIRouter(prefix="/users", tags=["Layer 2 - Users"])
 
@@ -46,7 +47,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{user_id}", response_model=UserOut)
-def update_user(user_id: int, user_data: UserCreate, db: Session = Depends(get_db)):
+def update_user(user_id: int, user_data: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -58,7 +59,8 @@ def update_user(user_id: int, user_data: UserCreate, db: Session = Depends(get_d
     data = user_data.model_dump(exclude={"password"})
     for field, value in data.items():
         setattr(user, field, value)
-    user.hashed_password = hash_password(user_data.password)
+    if user_data.password:
+        user.hashed_password = hash_password(user_data.password)
 
     db.commit()
     db.refresh(user)

@@ -1,30 +1,27 @@
+# ==== LAYER 5: Financial Records & Ledger ====
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
-class DepositCreate(BaseModel):
+class FeeRecordCreate(BaseModel):
     account_id: int
-    reference_number: str
-    amount: Decimal = Field(gt=0)
-    deposit_channel: Literal["CASH", "ATM", "ONLINE", "INTERBANK"]
-    deposited_by_user_id: Optional[int] = None
+    fee_type_id: int
+    transaction_reference: Optional[str] = None
+    amount_charged: Decimal = Field(gt=0)
     remarks: Optional[str] = None
-    transaction_date: datetime = Field(default_factory=datetime.utcnow)
 
 
-class DepositOut(BaseModel):
+class FeeRecordOut(BaseModel):
     id: int
     account_id: int
-    reference_number: str
-    amount: Decimal
-    deposit_channel: str
-    deposited_by_user_id: Optional[int] = None
+    fee_type_id: int
+    transaction_reference: Optional[str] = None
+    amount_charged: Decimal
+    charged_at: datetime
     remarks: Optional[str] = None
-    transaction_date: datetime
-    created_at: datetime
 
     class Config:
         from_attributes = True

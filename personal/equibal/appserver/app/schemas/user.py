@@ -1,3 +1,4 @@
+# ==== LAYER 2: Identity & Access ====
 from datetime import date, datetime
 from typing import Optional, Literal
 
@@ -15,6 +16,11 @@ class UserCreate(BaseModel):
     date_of_birth: Optional[date] = None
     role_id: int
     account_status: Literal["ACTIVE", "LOCKED", "DISABLED"] = "ACTIVE"
+
+
+class UserUpdate(UserCreate):
+    # Blank / missing password on edit = keep the current one.
+    password: Optional[str] = None
 
 
 class UserOut(BaseModel):
