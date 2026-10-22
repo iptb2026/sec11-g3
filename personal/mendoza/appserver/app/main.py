@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
@@ -59,6 +59,15 @@ app.include_router(interbank_transfers.router)
 app.include_router(fee_records.router)
 app.include_router(interest_records.router)
 app.include_router(ledger_entries.router)
+
+@app.middleware("http")
+async def handle_mendoza_prefix(request: Request, call_next):
+    path = request.scope.get("path", "")
+    if path == "/mendoza":
+        request.scope["path"] = "/"
+    elif path.startswith("/mendoza/"):
+        request.scope["path"] = path[len("/mendoza"):]
+    return await call_next(request)
 
 app.add_middleware(
     CORSMiddleware,
