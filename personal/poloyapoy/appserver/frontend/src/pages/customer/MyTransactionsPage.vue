@@ -2,6 +2,16 @@
   <q-page class="q-pa-md">
     <div class="text-h5 q-mb-md">My Transactions</div>
 
+    <q-banner v-if="fetchError" class="bg-negative text-white q-mb-md" rounded>
+      <template #avatar>
+        <q-icon name="error" color="white" />
+      </template>
+      {{ fetchError }}
+      <template #action>
+        <q-btn flat label="Retry" color="white" @click="loadTransactions" />
+      </template>
+    </q-banner>
+
     <q-table
       :rows="rows"
       :columns="columns"
@@ -27,12 +37,15 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useQuasar } from 'quasar'
 import api from '@/services/api'
 import { useAuthStore } from '@/stores/auth-store'
 
+const $q = useQuasar()
 const auth = useAuthStore()
 const rows = ref([])
 const loading = ref(true)
+const fetchError = ref(null)
 
 const columns = [
   { name: 'account_number', label: 'Account Number', field: 'account_number', align: 'left' },
@@ -56,7 +69,9 @@ function badgeColor (type) {
   }[type] || 'grey'
 }
 
-onMounted(async () => {
+async function loadTransactions () {
+  loading.value = true
+  fetchError.value = null
   try {
     const { data: allAccounts } = await api.get('/accounts/')
     const myAccountIds = allAccounts.filter((a) => a.customer_id === auth.userId).map((a) => a.id)
@@ -140,8 +155,16 @@ onMounted(async () => {
 
     combined.sort((a, b) => new Date(b.date) - new Date(a.date))
     rows.value = combined
+    $q.notify({ type: 'positive', message: 'Transactions loaded successfully' })
+  } catch (err) {
+    fetchError.value = err.response?.data?.detail || 'Failed to load transactions. Please try again.'
+    $q.notify({ type: 'negative', message: fetchError.value })
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  loadTransactions()
 })
 </script>
