@@ -61,7 +61,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useQuasar } from 'quasar'
+import { useQuasar, Dialog } from 'quasar'
 import api from '@/services/api'
 
 const $q = useQuasar()
@@ -150,10 +150,11 @@ async function save () {
 }
 
 function removeRow (row) {
-  $q.dialog({
+  Dialog.create({
     title: 'Confirm Delete',
+    ok: { label: 'Delete', color: 'negative' },
+    cancel: { label: 'Cancel', flat: true },
     message: `Delete withdrawal limit #${row.id}?`,
-    cancel: true,
     persistent: true,
   }).onOk(async () => {
     try {

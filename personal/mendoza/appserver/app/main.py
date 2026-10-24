@@ -23,6 +23,7 @@ from app.routers import (
     fee_records,
     interest_records,
     ledger_entries,
+    notifications,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -59,6 +60,7 @@ app.include_router(interbank_transfers.router)
 app.include_router(fee_records.router)
 app.include_router(interest_records.router)
 app.include_router(ledger_entries.router)
+app.include_router(notifications.router)
 
 @app.middleware("http")
 async def handle_mendoza_prefix(request: Request, call_next):

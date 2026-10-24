@@ -1,19 +1,22 @@
 # ==== LAYER 4: Transactions ====
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.audit import add_audit_log, snapshot_model
+from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
 from app.models.transfer import Transfer
 from app.schemas.transfer import TransferCreate, TransferOut
+from app.routers.notifications import create_and_send_notification
 
-router = APIRouter(prefix="/transfers", tags=["Layer 4 - Transfers"])
+router = APIRouter(prefix="/transfers", tags=["Layer 4 - Transfers"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/", response_model=TransferOut, status_code=status.HTTP_201_CREATED)
-def create_transfer(transfer: TransferCreate, db: Session = Depends(get_db)):
+def create_transfer(transfer: TransferCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     if transfer.source_account_id == transfer.destination_account_id:
         raise HTTPException(status_code=400, detail="source and destination accounts must be different")
 
@@ -59,14 +62,41 @@ def create_transfer(transfer: TransferCreate, db: Session = Depends(get_db)):
     destination.available_balance += transfer.amount
     destination.ledger_balance += transfer.amount
 
+    source_owner_id = source.customer_id
+    destination_owner_id = destination.customer_id
+    db.flush()
+    add_audit_log(db, actor_username, "CREATE", "Transfer", new_transfer.id, new_value=snapshot_model(new_transfer), request=request)
     db.commit()
     db.refresh(new_transfer)
+    create_and_send_notification(
+        source_owner_id,
+        "Transfer successful",
+        f"Your transfer of {new_transfer.amount} was successful. "
+        f"Reference: {new_transfer.transfer_reference}",
+        "TRANSFER_SENT",
+    ) if source_owner_id is not None else None
+    if destination_owner_id is not None and destination_owner_id != source_owner_id:
+        create_and_send_notification(
+            destination_owner_id,
+            "Money received",
+            f"You received {new_transfer.amount} from a transfer. "
+            f"Reference: {new_transfer.transfer_reference}",
+            "TRANSFER_RECEIVED",
+        )
+    elif destination_owner_id is not None:
+        create_and_send_notification(
+            destination_owner_id,
+            "Transfer completed",
+            f"Your transfer of {new_transfer.amount} between your accounts "
+            f"was successful. Reference: {new_transfer.transfer_reference}",
+            "TRANSFER",
+        )
     return new_transfer
 
 
 @router.get("/", response_model=list[TransferOut])
 def list_transfers(db: Session = Depends(get_db)):
-    return db.query(Transfer).all()
+    return db.query(Transfer).order_by(Transfer.id.desc()).all()
 
 
 @router.get("/{transfer_id}", response_model=TransferOut)
@@ -79,25 +109,16 @@ def get_transfer(transfer_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{transfer_id}", response_model=TransferOut)
 def update_transfer(transfer_id: int, data: TransferCreate, db: Session = Depends(get_db)):
-    """NOTE: does not move any money back — see the Layer 4 guide."""
-    transfer = db.query(Transfer).filter(Transfer.id == transfer_id).first()
-    if not transfer:
-        raise HTTPException(status_code=404, detail="Transfer not found")
+    raise HTTPException(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        detail="Transfers are immutable and cannot be edited."
+    )
 
-    for field, value in data.model_dump().items():
-        setattr(transfer, field, value)
-
-    db.commit()
-    db.refresh(transfer)
-    return transfer
 
 
 @router.delete("/{transfer_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transfer(transfer_id: int, db: Session = Depends(get_db)):
-    """NOTE: does not move any money back — see the Layer 4 guide."""
-    transfer = db.query(Transfer).filter(Transfer.id == transfer_id).first()
-    if not transfer:
-        raise HTTPException(status_code=404, detail="Transfer not found")
-
-    db.delete(transfer)
-    db.commit()
+    raise HTTPException(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        detail="Transfers are immutable and cannot be deleted."
+    )

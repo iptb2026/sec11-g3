@@ -6,7 +6,7 @@
       <q-btn color="primary" icon="add" label="New" @click="openCreate" />
     </div>
 
-    <q-table :rows="rows" :columns="columns" row-key="id" :loading="loading" flat bordered>
+    <q-table class="interbank-transfers-table" :rows="rows" :columns="columns" row-key="id" :loading="loading" flat bordered>
       <template #body-cell-actions="props">
         <q-td :props="props">
           <q-btn
@@ -26,6 +26,12 @@
         </q-td>
       </template>
     </q-table>
+
+      <template #body-cell-amount="props">
+        <q-td :props="props" class="text-no-wrap">
+          {{ formatMoney(props.value) }}
+        </q-td>
+      </template>
 
     <q-dialog v-model="showDialog">
       <q-card style="width: 460px">
@@ -73,14 +79,21 @@ import api from '@/services/api'
 
 const $q = useQuasar()
 
+function formatMoney (value) {
+  const amount = Number(value)
+  return Number.isFinite(amount)
+    ? amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : value
+}
+
 const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'left' },
   { name: 'source_account_id', label: 'Source Account ID', field: 'source_account_id', align: 'left' },
   { name: 'target_bank_id', label: 'Target Bank ID', field: 'target_bank_id', align: 'left' },
   { name: 'reference_number', label: 'Reference', field: 'reference_number', align: 'left' },
-  { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
+  { name: 'amount', label: 'Amount', field: 'amount', align: 'right', style: 'min-width: 150px; white-space: nowrap;', headerStyle: 'min-width: 150px; white-space: nowrap;' },
   { name: 'transfer_fee', label: 'Fee', field: 'transfer_fee', align: 'right' },
-  { name: 'status', label: 'Status', field: 'status', align: 'left' },
+  { name: 'status', label: 'Status', field: 'status', align: 'left', style: 'min-width: 120px; white-space: nowrap;', headerStyle: 'min-width: 120px; white-space: nowrap;' },
   { name: 'actions', label: 'Actions', field: 'actions', align: 'right' },
 ]
 
@@ -164,8 +177,9 @@ async function markStatus (row, status) {
 function removeRow (row) {
   $q.dialog({
     title: 'Confirm Delete',
+    ok: { label: 'Delete', color: 'negative' },
+    cancel: { label: 'Cancel', flat: true },
     message: `Delete interbank transfer "${row.reference_number}"?`,
-    cancel: true,
     persistent: true,
   }).onOk(async () => {
     try {

@@ -22,7 +22,7 @@
             <q-icon name="person" class="q-mr-sm" />{{ props.row.groupLabel }}
           </q-td>
         </q-tr>
-        <q-tr v-else :props="props">
+        <q-tr v-else :key="rowKey(props.row)" :props="props">
           <q-td v-for="col in props.cols" :key="col.name" :props="props">
             <template v-if="col.name === 'actions'">
               <q-btn dense flat round icon="edit" color="primary" @click="openEdit(props.row)" />
@@ -68,6 +68,29 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="showDeleteDialog" persistent>
+      <q-card style="min-width: 320px; max-width: 440px">
+        <q-card-section>
+          <div class="text-h6">Confirm Delete</div>
+        </q-card-section>
+
+        <q-card-section>
+          Are you sure you want to delete account
+          <strong>{{ selectedRow?.account_number }}</strong>?
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn
+            color="negative"
+            label="Delete"
+            :loading="deleting"
+            @click="deleteRow"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -96,32 +119,49 @@ const customerNameById = ref({})
 const loading = ref(false)
 
 function rowKey (row) {
-  return row.isGroupHeader ? row.key : row.id
+  return row.isGroupHeader ? row.key : `account-${row.id}`
+}
+
+function customerName (customerId) {
+  return customerNameById.value[Number(customerId)] || `Customer #${customerId}`
 }
 
 const groupedRows = computed(() => {
-  const sorted = [...rows.value].sort((a, b) => {
-    const nameA = customerNameById.value[a.customer_id] || ''
-    const nameB = customerNameById.value[b.customer_id] || ''
-    return nameA.localeCompare(nameB) || a.account_number.localeCompare(b.account_number)
+  const uniqueRows = rows.value.filter(
+    (row, index, allRows) =>
+      allRows.findIndex(item => String(item.id) === String(row.id)) === index
+  )
+  const sorted = uniqueRows.sort((a, b) => {
+    const nameA = customerName(a.customer_id)
+    const nameB = customerName(b.customer_id)
+    return nameA.localeCompare(nameB) ||
+      String(a.account_number ?? '').localeCompare(String(b.account_number ?? ''))
   })
 
   const result = []
   let lastCustomerId = null
+
   for (const row of sorted) {
-    if (row.customer_id !== lastCustomerId) {
+    const customerId = Number(row.customer_id)
+
+    if (customerId !== lastCustomerId) {
       result.push({
         isGroupHeader: true,
-        key: `group-${row.customer_id}`,
-        groupLabel: customerNameById.value[row.customer_id] || `Customer #${row.customer_id}`,
+        key: `group-${customerId}`,
+        groupLabel: customerName(customerId),
       })
-      lastCustomerId = row.customer_id
+      lastCustomerId = customerId
     }
+
     result.push(row)
   }
+
   return result
 })
 const showDialog = ref(false)
+const showDeleteDialog = ref(false)
+const selectedRow = ref(null)
+const deleting = ref(false)
 const editingId = ref(null)
 const emptyForm = () => ({
   account_number: '',
@@ -142,7 +182,7 @@ async function loadRows () {
 async function loadOptions () {
   const { data: users } = await api.get('/users/')
   customerOptions.value = users.map((u) => ({ label: `${u.username} (${u.first_name} ${u.last_name})`, value: u.id }))
-  customerNameById.value = Object.fromEntries(users.map((u) => [u.id, `${u.first_name} ${u.last_name}`]))
+  customerNameById.value = Object.fromEntries(users.map((u) => [Number(u.id), `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username || `Customer #${u.id}`]))
 
   const { data: types } = await api.get('/account-types/')
   accountTypeOptions.value = types.map((t) => ({ label: `${t.type_code} - ${t.type_name}`, value: t.id }))
@@ -182,20 +222,34 @@ async function save () {
 }
 
 function removeRow (row) {
-  $q.dialog({
-    title: 'Confirm Delete',
-    message: `Delete account "${row.account_number}"?`,
-    cancel: true,
-    persistent: true,
-  }).onOk(async () => {
-    try {
-      await api.delete(`/accounts/${row.id}`)
-      $q.notify({ type: 'positive', message: 'Account deleted' })
-      loadRows()
-    } catch (err) {
-      $q.notify({ type: 'negative', message: err.response?.data?.detail || 'Delete failed' })
-    }
-  })
+  selectedRow.value = row
+  showDeleteDialog.value = true
+}
+
+async function deleteRow () {
+  if (!selectedRow.value || deleting.value) return
+
+  deleting.value = true
+  try {
+    await api.delete(`/accounts/${selectedRow.value.id}`)
+    showDeleteDialog.value = false
+    $q.notify({ type: 'positive', message: 'Account deleted' })
+    selectedRow.value = null
+    await loadRows()
+  } catch (err) {
+    console.error('Account deletion failed:', {
+      status: err.response?.status,
+      data: err.response?.data,
+      message: err.message
+    })
+    $q.notify({
+      type: 'negative',
+      message: err.response?.data?.detail || err.message || 'Delete failed',
+      timeout: 6000
+    })
+  } finally {
+    deleting.value = false
+  }
 }
 
 onMounted(() => {

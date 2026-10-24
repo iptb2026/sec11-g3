@@ -80,16 +80,28 @@ export const useAuthStore = defineStore('auth', {
       this.persist()
     },
 
-    logout () {
-      this.token = null
-      this.userId = null
-      this.username = null
-      this.firstName = null
-      this.lastName = null
-      this.roleId = null
-      this.roleCode = null
-      this.roleName = null
-      localStorage.removeItem(STORAGE_KEY)
+    async logout ({ notifyBackend = false } = {}) {
+      const token = this.token
+
+      try {
+        if (notifyBackend && token) {
+          await api.post('/auth/logout', null, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        }
+      } catch (error) {
+        console.warn('Backend logout request failed:', error)
+      } finally {
+        this.token = null
+        this.userId = null
+        this.username = null
+        this.firstName = null
+        this.lastName = null
+        this.roleId = null
+        this.roleCode = null
+        this.roleName = null
+        localStorage.removeItem(STORAGE_KEY)
+      }
     },
   },
 })

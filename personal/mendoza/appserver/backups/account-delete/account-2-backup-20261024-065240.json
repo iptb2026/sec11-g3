@@ -1,0 +1,32 @@
+{
+  "backup_created_at": "2026-10-24T06:52:40.898310",
+  "reason": "User-confirmed test account deletion",
+  "account": {
+    "id": 2,
+    "account_number": "2",
+    "customer_id": 6,
+    "account_type_id": 4,
+    "available_balance": "0.00",
+    "ledger_balance": "0.00",
+    "currency_code": "PHP",
+    "status": "ACTIVE",
+    "opened_at": "2026-10-24T06:28:25",
+    "closed_at": null,
+    "branch_code": "2"
+  },
+  "linked_records": {
+    "withdrawals": [
+      {
+        "id": 2,
+        "account_id": 2,
+        "reference_number": "1234",
+        "amount": "500.00",
+        "withdrawal_channel": "ONLINE",
+        "approved_by_user_id": null,
+        "remarks": "TEST",
+        "transaction_date": "2026-10-24T06:28:57",
+        "created_at": "2026-10-24T06:28:57"
+      }
+    ]
+  }
+}

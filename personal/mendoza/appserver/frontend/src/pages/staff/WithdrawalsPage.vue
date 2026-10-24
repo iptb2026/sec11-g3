@@ -7,18 +7,12 @@
     </div>
 
     <q-table :rows="rows" :columns="columns" row-key="id" :loading="loading" flat bordered>
-      <template #body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn dense flat round icon="edit" color="primary" @click="openEdit(props.row)" />
-          <q-btn dense flat round icon="delete" color="negative" @click="removeRow(props.row)" />
-        </q-td>
-      </template>
     </q-table>
 
     <q-dialog v-model="showDialog">
       <q-card style="width: 420px">
         <q-card-section>
-          <div class="text-h6">{{ editingId ? 'Edit Withdrawal' : 'New Withdrawal' }}</div>
+          <div class="text-h6">New Withdrawal</div>
         </q-card-section>
 
         <q-card-section class="q-gutter-md">
@@ -52,6 +46,8 @@
             v-model="form.withdrawal_channel"
             label="Channel"
             filled
+            emit-value
+            map-options
             use-input
             hide-selected
             fill-input
@@ -85,26 +81,31 @@ const columns = [
   { name: 'account_id', label: 'Auto ID', field: 'account_id', align: 'left' },
   { name: 'account_number', label: 'Account Number', field: (row) => accountNumberByAccountId.value[row.account_id] || '', align: 'left' },
   { name: 'account_name', label: 'Account Name', field: (row) => accountHolderByAccountId.value[row.account_id] || '', align: 'left' },
+  { name: 'teller', label: 'Teller', field: (row) => userNameByUserId.value[row.approved_by_user_id] || '—', align: 'left' },
   { name: 'reference_number', label: 'Reference', field: 'reference_number', align: 'left' },
   { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
   { name: 'withdrawal_channel', label: 'Channel', field: 'withdrawal_channel', align: 'left' },
   { name: 'transaction_date', label: 'Date', field: 'transaction_date', align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' },
 ]
 
 const rows = ref([])
 const accountOptions = ref([])
 const accountNumberByAccountId = ref({})
 const accountHolderByAccountId = ref({})
+const userNameByUserId = ref({})
 const loading = ref(false)
 const showDialog = ref(false)
-const editingId = ref(null)
 const emptyForm = () => ({ account_id: null, reference_number: '', amount: 0, withdrawal_channel: '', remarks: '' })
 const form = ref(emptyForm())
 
 const accountHolderName = computed(() => accountHolderByAccountId.value[form.value.account_id] || '')
 
-const channelOptions = ['ONLINE', 'ATM', 'TELLER']
+// Teller-assisted withdrawals use the existing valid BRANCH database value.
+const channelOptions = [
+  { label: 'ONLINE', value: 'ONLINE' },
+  { label: 'ATM', value: 'ATM' },
+  { label: 'Teller (Branch)', value: 'BRANCH' },
+]
 const filteredChannelOptions = ref(channelOptions)
 function filterChannelOptions (val, update) {
   update(() => {
@@ -112,7 +113,7 @@ function filterChannelOptions (val, update) {
       filteredChannelOptions.value = channelOptions
     } else {
       const needle = val.toLowerCase()
-      filteredChannelOptions.value = channelOptions.filter((v) => v.toLowerCase().includes(needle))
+      filteredChannelOptions.value = channelOptions.filter((v) => v.label.toLowerCase().includes(needle))
     }
   })
 }
@@ -132,8 +133,9 @@ async function loadOptions () {
 
   const nameByUserId = {}
   users.forEach((u) => {
-    nameByUserId[u.id] = `${u.first_name} ${u.last_name}`
+    nameByUserId[u.id] = `${u.first_name} ${u.last_name}`.trim()
   })
+  userNameByUserId.value = nameByUserId
 
   accountOptions.value = accounts.map((a) => ({
     label: a.account_number,
@@ -147,53 +149,22 @@ async function loadOptions () {
 }
 
 function openCreate () {
-  editingId.value = null
   form.value = emptyForm()
-  showDialog.value = true
-}
-
-function openEdit (row) {
-  editingId.value = row.id
-  form.value = {
-    account_id: row.account_id,
-    reference_number: row.reference_number,
-    amount: Number(row.amount),
-    withdrawal_channel: row.withdrawal_channel,
-    remarks: row.remarks,
-  }
   showDialog.value = true
 }
 
 async function save () {
   try {
-    if (editingId.value) {
-      await api.put(`/withdrawals/${editingId.value}`, form.value)
-    } else {
-      await api.post('/withdrawals/', form.value)
-    }
+    await api.post('/withdrawals/', form.value)
     showDialog.value = false
-    $q.notify({ type: 'positive', message: 'Withdrawal saved' })
-    loadRows()
+    $q.notify({ type: 'positive', message: 'Withdrawal recorded' })
+    await loadRows()
   } catch (err) {
-    $q.notify({ type: 'negative', message: err.response?.data?.detail || 'Save failed' })
+    $q.notify({
+      type: 'negative',
+      message: err.response?.data?.detail || 'Failed to record withdrawal'
+    })
   }
-}
-
-function removeRow (row) {
-  $q.dialog({
-    title: 'Confirm Delete',
-    message: `Delete withdrawal "${row.reference_number}"?`,
-    cancel: true,
-    persistent: true,
-  }).onOk(async () => {
-    try {
-      await api.delete(`/withdrawals/${row.id}`)
-      $q.notify({ type: 'positive', message: 'Withdrawal deleted' })
-      loadRows()
-    } catch (err) {
-      $q.notify({ type: 'negative', message: err.response?.data?.detail || 'Delete failed' })
-    }
-  })
 }
 
 onMounted(() => {

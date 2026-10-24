@@ -1,6 +1,7 @@
 # ==== LAYER 1: Foundation & Reference Data ====
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
+from app.core.audit import add_audit_log, snapshot_model
 from app.core.db_utils import commit_or_409
 from app.database.session import get_db
 from app.models.fee_type import FeeType
@@ -14,19 +15,21 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=FeeTypeOut, status_code=status.HTTP_201_CREATED)
-def create_fee_type(fee_type: FeeTypeCreate, db: Session = Depends(get_db)):
+def create_fee_type(fee_type: FeeTypeCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     existing = db.query(FeeType).filter(FeeType.fee_code == fee_type.fee_code).first()
     if existing:
         raise HTTPException(status_code=400, detail="fee_code already exists")
     new_fee_type = FeeType(**fee_type.model_dump())
     db.add(new_fee_type)
+    db.flush()
+    add_audit_log(db, actor_username, "CREATE", "FeeType", new_fee_type.id, new_value=snapshot_model(new_fee_type), request=request)
     db.commit()
     db.refresh(new_fee_type)
     return new_fee_type
 
 @router.get("/", response_model=list[FeeTypeOut])
 def list_fee_types(db: Session = Depends(get_db)):
-    return db.query(FeeType).all()
+    return db.query(FeeType).order_by(FeeType.id.desc()).all()
 
 @router.get("/{fee_type_id}", response_model=FeeTypeOut)
 def get_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
@@ -36,24 +39,28 @@ def get_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
     return fee_type
 
 @router.put("/{fee_type_id}", response_model=FeeTypeOut)
-def update_fee_type(fee_type_id: int, data: FeeTypeCreate, db: Session = Depends(get_db)):
+def update_fee_type(fee_type_id: int, data: FeeTypeCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
     if not fee_type:
         raise HTTPException(status_code=404, detail="Fee type not found")
+    old_values = snapshot_model(fee_type)
     for field, value in data.model_dump().items():
         setattr(fee_type, field, value)
+    add_audit_log(db, actor_username, "UPDATE", "FeeType", fee_type.id, old_value=old_values, new_value=snapshot_model(fee_type), request=request)
     db.commit()
     db.refresh(fee_type)
     return fee_type
 
 
 @router.delete("/{fee_type_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_fee_type(fee_type_id: int, db: Session = Depends(get_db)):
+def delete_fee_type(fee_type_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     fee_type = db.query(FeeType).filter(FeeType.id == fee_type_id).first()
 
     if not fee_type:
         raise HTTPException(status_code=404, detail="Fee type not found")
 
+    old_values = snapshot_model(fee_type)
+    add_audit_log(db, actor_username, "DELETE", "FeeType", fee_type.id, old_value=old_values, request=request)
     db.delete(fee_type)
 
     commit_or_409(

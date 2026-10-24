@@ -1,7 +1,8 @@
 # ==== LAYER 2: Identity & Access ====
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
+from app.core.audit import add_audit_log, snapshot_model
 
 from app.core.db_utils import commit_or_409
 from app.core.security import get_current_user, hash_password
@@ -25,7 +26,7 @@ router = APIRouter(
 )
 def create_user(
     user: UserCreate,
-    db: Session = Depends(get_db)
+    request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     role = db.query(Role).filter(
         Role.id == user.role_id
@@ -58,6 +59,8 @@ def create_user(
     )
 
     db.add(new_user)
+    db.flush()
+    add_audit_log(db, actor_username, "CREATE", "User", new_user.id, new_value=snapshot_model(new_user), request=request)
     db.commit()
     db.refresh(new_user)
 
@@ -71,7 +74,7 @@ def create_user(
 def list_users(
     db: Session = Depends(get_db)
 ):
-    return db.query(User).all()
+    return db.query(User).order_by(User.id.desc()).all()
 
 
 @router.get(
@@ -102,7 +105,7 @@ def get_user(
 def update_user(
     user_id: int,
     user_data: UserCreate,
-    db: Session = Depends(get_db)
+    request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(
         User.id == user_id
@@ -128,6 +131,7 @@ def update_user(
         exclude={"password"}
     )
 
+    old_values = snapshot_model(user)
     for field, value in data.items():
         setattr(user, field, value)
 
@@ -135,6 +139,7 @@ def update_user(
         user_data.password
     )
 
+    add_audit_log(db, actor_username, "UPDATE", "User", user.id, old_value=old_values, new_value=snapshot_model(user), request=request)
     db.commit()
     db.refresh(user)
 
@@ -147,7 +152,7 @@ def update_user(
 )
 def delete_user(
     user_id: int,
-    db: Session = Depends(get_db)
+    request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(
         User.id == user_id
@@ -159,6 +164,8 @@ def delete_user(
             detail="User not found"
         )
 
+    old_values = snapshot_model(user)
+    add_audit_log(db, actor_username, "DELETE", "User", user.id, old_value=old_values, request=request)
     db.delete(user)
 
     commit_or_409(

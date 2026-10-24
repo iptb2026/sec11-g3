@@ -110,8 +110,9 @@ async function save () {
 function removeRow (row) {
   $q.dialog({
     title: 'Confirm Delete',
+    ok: { label: 'Delete', color: 'negative' },
+    cancel: { label: 'Cancel', flat: true },
     message: `Delete interest record #${row.id}?`,
-    cancel: true,
     persistent: true,
   }).onOk(async () => {
     try {

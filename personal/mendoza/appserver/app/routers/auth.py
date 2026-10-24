@@ -7,7 +7,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import check_password, create_token
+from app.core.security import check_password, create_token, oauth2_scheme
+from app.core.audit import add_audit_log
 from app.database.session import get_db
 from app.models.session import UserSession
 from app.models.user import User
@@ -35,6 +36,16 @@ def login(
         form_data.password,
         user.hashed_password
     ):
+        add_audit_log(
+            db=db,
+            actor_username=form_data.username,
+            action_type="LOGIN_FAILED",
+            entity_name="User",
+            entity_id=user.id if user else None,
+            new_value={"username": form_data.username},
+            request=request,
+        )
+        db.commit()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -42,6 +53,16 @@ def login(
         )
 
     if user.account_status != "ACTIVE":
+        add_audit_log(
+            db=db,
+            actor_username=user.username,
+            action_type="LOGIN_BLOCKED",
+            entity_name="User",
+            entity_id=user.id,
+            new_value={"reason": "Account is not active"},
+            request=request,
+        )
+        db.commit()
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is not active"
@@ -72,6 +93,15 @@ def login(
 
     user.last_login_at = datetime.utcnow()
 
+    add_audit_log(
+        db=db,
+        actor_username=user.username,
+        action_type="LOGIN_SUCCESS",
+        entity_name="User",
+        entity_id=user.id,
+        request=request,
+    )
+
     db.commit()
 
     return Token(
@@ -82,12 +112,8 @@ def login(
 
 @router.post("/logout")
 def logout(
-    token: str = Depends(
-        __import__(
-            "app.core.security",
-            fromlist=["oauth2_scheme"]
-        ).oauth2_scheme
-    ),
+    request: Request,
+    token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ):
     session = (
@@ -106,6 +132,17 @@ def logout(
         )
 
     session.revoked_at = datetime.utcnow()
+
+    actor = db.query(User).filter(User.id == session.user_id).first()
+    add_audit_log(
+        db=db,
+        actor_username=actor.username if actor else "",
+        action_type="LOGOUT",
+        entity_name="UserSession",
+        entity_id=session.user_id,
+        request=request,
+    )
+
     db.commit()
 
     return {

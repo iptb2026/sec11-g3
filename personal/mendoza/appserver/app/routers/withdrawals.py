@@ -1,19 +1,22 @@
 # ==== LAYER 4: Transactions ====
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.audit import add_audit_log, snapshot_model
+from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
 from app.models.user import User
 from app.models.withdrawal import Withdrawal
 from app.models.withdrawal_limit import WithdrawalLimit
 from app.schemas.withdrawal import WithdrawalCreate, WithdrawalOut
+from app.routers.notifications import create_and_send_notification
 
-router = APIRouter(prefix="/withdrawals", tags=["Layer 4 - Withdrawals"])
+router = APIRouter(prefix="/withdrawals", tags=["Layer 4 - Withdrawals"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/", response_model=WithdrawalOut, status_code=status.HTTP_201_CREATED)
-def create_withdrawal(withdrawal: WithdrawalCreate, db: Session = Depends(get_db)):
+def create_withdrawal(withdrawal: WithdrawalCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     # Lock the account row for the duration of this transaction — without
     # this, two withdrawals submitted at nearly the same moment could both
     # read the same starting balance and one of their deductions would be
@@ -51,14 +54,25 @@ def create_withdrawal(withdrawal: WithdrawalCreate, db: Session = Depends(get_db
     if limit:
         limit.daily_used_amount += withdrawal.amount
 
+    owner_id = account.customer_id
+    db.flush()
+    add_audit_log(db, actor_username, "CREATE", "Withdrawal", new_withdrawal.id, new_value=snapshot_model(new_withdrawal), request=request)
     db.commit()
     db.refresh(new_withdrawal)
+    if owner_id is not None:
+        create_and_send_notification(
+            owner_id,
+            "Withdrawal successful",
+            f"Your withdrawal of {new_withdrawal.amount} was successful. "
+            f"Reference: {new_withdrawal.reference_number}",
+            "WITHDRAWAL",
+        )
     return new_withdrawal
 
 
 @router.get("/", response_model=list[WithdrawalOut])
 def list_withdrawals(db: Session = Depends(get_db)):
-    return db.query(Withdrawal).all()
+    return db.query(Withdrawal).order_by(Withdrawal.id.desc()).all()
 
 
 @router.get("/{withdrawal_id}", response_model=WithdrawalOut)
@@ -70,26 +84,30 @@ def get_withdrawal(withdrawal_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{withdrawal_id}", response_model=WithdrawalOut)
-def update_withdrawal(withdrawal_id: int, data: WithdrawalCreate, db: Session = Depends(get_db)):
+def update_withdrawal(withdrawal_id: int, data: WithdrawalCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     """NOTE: does not re-adjust the account balance or the daily limit usage — see the Layer 4 guide."""
     withdrawal = db.query(Withdrawal).filter(Withdrawal.id == withdrawal_id).first()
     if not withdrawal:
         raise HTTPException(status_code=404, detail="Withdrawal not found")
 
+    old_values = snapshot_model(withdrawal)
     for field, value in data.model_dump().items():
         setattr(withdrawal, field, value)
 
+    add_audit_log(db, actor_username, "UPDATE", "Withdrawal", withdrawal.id, old_value=old_values, new_value=snapshot_model(withdrawal), request=request)
     db.commit()
     db.refresh(withdrawal)
     return withdrawal
 
 
 @router.delete("/{withdrawal_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_withdrawal(withdrawal_id: int, db: Session = Depends(get_db)):
+def delete_withdrawal(withdrawal_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     """NOTE: does not reverse the account balance or the daily limit usage — see the Layer 4 guide."""
     withdrawal = db.query(Withdrawal).filter(Withdrawal.id == withdrawal_id).first()
     if not withdrawal:
         raise HTTPException(status_code=404, detail="Withdrawal not found")
 
+    old_values = snapshot_model(withdrawal)
+    add_audit_log(db, actor_username, "DELETE", "Withdrawal", withdrawal.id, old_value=old_values, request=request)
     db.delete(withdrawal)
     db.commit()

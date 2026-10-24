@@ -34,7 +34,7 @@
           <q-input v-model.number="form.annual_rate" label="Annual Rate %" type="number" filled />
           <q-input v-model="form.compounding_frequency" label="Compounding Frequency" filled hint="e.g. MONTHLY" />
           <q-input v-model="form.effective_date" label="Effective Date" filled hint="YYYY-MM-DD" />
-          <q-input v-model="form.expiration_date" label="Expiration Date" filled hint="YYYY-MM-DD (optional)" />
+          <q-input v-model="form.expiration_date" label="Expiration Date" filled hint="YYYY-MM-DD" />
         </q-card-section>
 
         <q-card-actions align="right">
@@ -127,8 +127,9 @@ async function save () {
 function removeRow (row) {
   $q.dialog({
     title: 'Confirm Delete',
+    ok: { label: 'Delete', color: 'negative' },
+    cancel: { label: 'Cancel', flat: true },
     message: `Delete interest policy "${row.policy_name}"?`,
-    cancel: true,
     persistent: true,
   }).onOk(async () => {
     try {

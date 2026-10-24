@@ -1,0 +1,234 @@
+import asyncio
+import logging
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from jose import JWTError, jwt
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.core.security import get_current_user
+from app.database.session import SessionLocal, get_db
+from app.models.notification import Notification
+from app.models.session import UserSession
+from app.models.user import User
+
+router = APIRouter(prefix="/notifications", tags=["Notifications"])
+logger = logging.getLogger(__name__)
+
+
+class NotificationConnections:
+    def __init__(self):
+        self.connections = {}
+        self.lock = asyncio.Lock()
+        self.loop = None
+
+    async def connect(self, user_id, websocket):
+        await websocket.accept()
+        self.loop = asyncio.get_running_loop()
+        async with self.lock:
+            self.connections.setdefault(user_id, set()).add(websocket)
+
+    def send_from_sync_endpoint(self, user_id, payload):
+        # Transaction endpoints run synchronously, so schedule delivery
+        # on the event loop serving the WebSocket connections.
+        loop = self.loop
+        if loop and loop.is_running():
+            loop.call_soon_threadsafe(
+                lambda: asyncio.create_task(
+                    self.send_to_user(user_id, payload)
+                )
+            )
+
+    async def disconnect(self, user_id, websocket):
+        async with self.lock:
+            sockets = self.connections.get(user_id, set())
+            sockets.discard(websocket)
+            if not sockets:
+                self.connections.pop(user_id, None)
+
+    async def send_to_user(self, user_id, payload):
+        async with self.lock:
+            sockets = list(self.connections.get(user_id, set()))
+
+        for websocket in sockets:
+            try:
+                await websocket.send_json(payload)
+            except Exception:
+                await self.disconnect(user_id, websocket)
+
+
+manager = NotificationConnections()
+
+
+def notification_payload(notification):
+    return {
+        "id": notification.id,
+        "title": notification.title,
+        "message": notification.message,
+        "notification_type": notification.notification_type,
+        "is_read": notification.is_read,
+        "created_at": (
+            notification.created_at.isoformat()
+            if notification.created_at
+            else None
+        ),
+    }
+
+
+def create_and_send_notification(user_id, title, message, notification_type="INFO"):
+    """Save a notification, then send it to connected devices."""
+    db = SessionLocal()
+    try:
+        notification = Notification(
+            user_id=user_id,
+            title=title,
+            message=message,
+            notification_type=notification_type,
+        )
+        db.add(notification)
+        db.commit()
+        db.refresh(notification)
+        payload = notification_payload(notification)
+    except Exception:
+        db.rollback()
+        logger.exception("Could not save notification for user %s", user_id)
+        return
+    finally:
+        db.close()
+
+    manager.send_from_sync_endpoint(user_id, payload)
+
+
+@router.get("/")
+def list_notifications(
+    current_username: str = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.username == current_username).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    notifications = (
+        db.query(Notification)
+        .filter(Notification.user_id == user.id)
+        .order_by(Notification.created_at.desc(), Notification.id.desc())
+        .limit(100)
+        .all()
+    )
+
+    unread_count = (
+        db.query(Notification)
+        .filter(
+            Notification.user_id == user.id,
+            Notification.is_read.is_(False),
+        )
+        .count()
+    )
+
+    return {
+        "notifications": [notification_payload(item) for item in notifications],
+        "unread_count": unread_count,
+    }
+
+
+@router.patch("/{notification_id}/read")
+def mark_notification_read(
+    notification_id: int,
+    current_username: str = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.username == current_username).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    notification = (
+        db.query(Notification)
+        .filter(
+            Notification.id == notification_id,
+            Notification.user_id == user.id,
+        )
+        .first()
+    )
+
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+
+    if not notification.is_read:
+        notification.is_read = True
+        notification.read_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        db.commit()
+
+    return {"message": "Notification marked as read"}
+
+
+@router.patch("/read-all")
+def mark_all_notifications_read(
+    current_username: str = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.username == current_username).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    db.query(Notification).filter(
+        Notification.user_id == user.id,
+        Notification.is_read.is_(False),
+    ).update(
+        {
+            Notification.is_read: True,
+            Notification.read_at: datetime.now(timezone.utc).replace(tzinfo=None),
+        },
+        synchronize_session=False,
+    )
+    db.commit()
+
+    return {"message": "All notifications marked as read"}
+
+
+@router.websocket("/ws")
+async def notifications_websocket(websocket: WebSocket, token: str = ""):
+    # Browser WebSocket APIs cannot set the normal Authorization header.
+    # Validate the existing JWT before accepting the connection.
+    db = SessionLocal()
+    user_id = None
+
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
+        username = payload.get("sub")
+        if not username:
+            raise ValueError("Missing token subject")
+
+        user = db.query(User).filter(User.username == username).first()
+        if not user or user.account_status != "ACTIVE":
+            raise ValueError("User is not active")
+
+        session = (
+            db.query(UserSession)
+            .filter(UserSession.jwt_token == token)
+            .first()
+        )
+        if not session or session.revoked_at is not None:
+            raise ValueError("Session is invalid or revoked")
+
+        user_id = user.id
+    except (JWTError, ValueError):
+        await websocket.close(code=4401)
+        return
+    finally:
+        db.close()
+
+    await manager.connect(user_id, websocket)
+
+    try:
+        # Keep the connection alive; clients may send a simple ping.
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await manager.disconnect(user_id, websocket)

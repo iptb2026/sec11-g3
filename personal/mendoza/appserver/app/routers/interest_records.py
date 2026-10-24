@@ -1,18 +1,20 @@
 # ==== LAYER 5: Financial Records & Ledger ====
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.audit import add_audit_log, snapshot_model
+from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
 from app.models.interest_policy import InterestPolicy
 from app.models.interest_record import InterestRecord
 from app.schemas.interest_record import InterestRecordCreate, InterestRecordOut
 
-router = APIRouter(prefix="/interest-records", tags=["Layer 5 - Interest Records"])
+router = APIRouter(prefix="/interest-records", tags=["Layer 5 - Interest Records"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/", response_model=InterestRecordOut, status_code=status.HTTP_201_CREATED)
-def create_interest_record(record: InterestRecordCreate, db: Session = Depends(get_db)):
+def create_interest_record(record: InterestRecordCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     # Lock the account row — see the same note in deposits.py / withdrawals.py.
     account = db.query(Account).filter(Account.id == record.account_id).with_for_update().first()
     if not account:
@@ -36,6 +38,8 @@ def create_interest_record(record: InterestRecordCreate, db: Session = Depends(g
     )
     db.add(new_record)
 
+    db.flush()
+    add_audit_log(db, actor_username, "CREATE", "InterestRecord", new_record.id, new_value=snapshot_model(new_record), request=request)
     db.commit()
     db.refresh(new_record)
     return new_record
@@ -43,7 +47,7 @@ def create_interest_record(record: InterestRecordCreate, db: Session = Depends(g
 
 @router.get("/", response_model=list[InterestRecordOut])
 def list_interest_records(db: Session = Depends(get_db)):
-    return db.query(InterestRecord).all()
+    return db.query(InterestRecord).order_by(InterestRecord.id.desc()).all()
 
 
 @router.get("/{record_id}", response_model=InterestRecordOut)
@@ -55,11 +59,12 @@ def get_interest_record(record_id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_interest_record(record_id: int, db: Session = Depends(get_db)):
+def delete_interest_record(record_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     """NOTE: does not reverse the account balance change."""
     record = db.query(InterestRecord).filter(InterestRecord.id == record_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Interest record not found")
 
+    add_audit_log(db, actor_username, "DELETE", "InterestRecord", record.id, old_value=snapshot_model(record), request=request)
     db.delete(record)
     db.commit()

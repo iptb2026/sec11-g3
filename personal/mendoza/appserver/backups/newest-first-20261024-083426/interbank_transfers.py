@@ -1,0 +1,135 @@
+# ==== LAYER 4: Transactions ====
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.orm import Session
+
+from app.core.audit import add_audit_log, snapshot_model
+from app.core.security import get_current_user
+from app.database.session import get_db
+from app.models.account import Account
+from app.models.bank import Bank
+from app.models.interbank_transfer import InterbankTransfer
+from app.routers.notifications import create_and_send_notification
+from app.schemas.interbank_transfer import (
+    InterbankTransferCreate,
+    InterbankTransferStatusUpdate,
+    InterbankTransferOut,
+)
+
+router = APIRouter(prefix="/interbank-transfers", tags=["Layer 4 - Interbank Transfers"], dependencies=[Depends(get_current_user)])
+
+
+@router.post("/", response_model=InterbankTransferOut, status_code=status.HTTP_201_CREATED)
+def create_interbank_transfer(transfer: InterbankTransferCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Lock the source account row for the duration of this transaction — see
+    # the same note in deposits.py / withdrawals.py.
+    source = db.query(Account).filter(Account.id == transfer.source_account_id).with_for_update().first()
+    if not source:
+        raise HTTPException(status_code=400, detail="source_account_id does not exist")
+
+    bank = db.query(Bank).filter(Bank.id == transfer.target_bank_id).first()
+    if not bank:
+        raise HTTPException(status_code=400, detail="target_bank_id does not exist")
+
+    existing = db.query(InterbankTransfer).filter(
+        InterbankTransfer.reference_number == transfer.reference_number
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="reference_number already exists")
+
+    if source.status != "ACTIVE":
+        raise HTTPException(status_code=400, detail=f"Source account is {source.status}, cannot transfer")
+
+    total_debit = transfer.amount + transfer.transfer_fee
+    if source.available_balance < total_debit:
+        raise HTTPException(status_code=400, detail="Insufficient balance to cover amount + transfer fee")
+
+    # Unlike an internal `transfer`, the destination bank is external — we
+    # can only debit our own side. The transfer starts PROCESSING (not
+    # SUCCESS) because settlement with the other bank isn't instant; use
+    # PUT /interbank-transfers/{id}/status to move it to SUCCESS/FAILED later.
+    new_transfer = InterbankTransfer(**transfer.model_dump(), status="PROCESSING")
+    db.add(new_transfer)
+
+    source.available_balance -= total_debit
+    source.ledger_balance -= total_debit
+
+    owner_id = source.customer_id
+    db.flush()
+    add_audit_log(db, actor_username, "CREATE", "InterbankTransfer", new_transfer.id, new_value=snapshot_model(new_transfer), request=request)
+    db.commit()
+    db.refresh(new_transfer)
+    if owner_id is not None:
+        create_and_send_notification(
+            owner_id,
+            "Interbank transfer submitted",
+            f"Your interbank transfer of {new_transfer.amount} has been submitted "
+            f"and is being processed. Reference: {new_transfer.reference_number}",
+            "INTERBANK_PROCESSING",
+        )
+    return new_transfer
+
+
+@router.get("/", response_model=list[InterbankTransferOut])
+def list_interbank_transfers(db: Session = Depends(get_db)):
+    return db.query(InterbankTransfer).all()
+
+
+@router.get("/{transfer_id}", response_model=InterbankTransferOut)
+def get_interbank_transfer(transfer_id: int, db: Session = Depends(get_db)):
+    transfer = db.query(InterbankTransfer).filter(InterbankTransfer.id == transfer_id).first()
+    if not transfer:
+        raise HTTPException(status_code=404, detail="Interbank transfer not found")
+    return transfer
+
+
+@router.put("/{transfer_id}/status", response_model=InterbankTransferOut)
+def update_interbank_transfer_status(
+    transfer_id: int, data: InterbankTransferStatusUpdate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)
+):
+    """Moves a PROCESSING transfer to its final settlement status (SUCCESS/FAILED/REVERSED)."""
+    transfer = db.query(InterbankTransfer).filter(InterbankTransfer.id == transfer_id).first()
+    if not transfer:
+        raise HTTPException(status_code=404, detail="Interbank transfer not found")
+
+    old_values = snapshot_model(transfer)
+    previous_status = transfer.status
+    source_account = db.query(Account).filter(
+        Account.id == transfer.source_account_id
+    ).first()
+    owner_id = source_account.customer_id if source_account else None
+    transfer.status = data.status
+    if data.status in ("SUCCESS", "FAILED", "REVERSED"):
+        transfer.completed_at = datetime.utcnow()
+
+    add_audit_log(db, actor_username, "UPDATE", "InterbankTransfer", transfer.id, old_value=old_values, new_value=snapshot_model(transfer), request=request)
+    db.commit()
+    db.refresh(transfer)
+    if owner_id is not None and previous_status != data.status and data.status in ("SUCCESS", "FAILED", "REVERSED"):
+        title = {
+            "SUCCESS": "Interbank transfer successful",
+            "FAILED": "Interbank transfer failed",
+            "REVERSED": "Interbank transfer reversed",
+        }[data.status]
+        create_and_send_notification(
+            owner_id,
+            title,
+            f"Your interbank transfer of {transfer.amount} is now "
+            f"{transfer.status.lower()}. Reference: {transfer.reference_number}",
+            f"INTERBANK_{transfer.status}",
+        )
+    return transfer
+
+
+@router.delete("/{transfer_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_interbank_transfer(transfer_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    """NOTE: does not move any money back — see the Layer 4 guide."""
+    transfer = db.query(InterbankTransfer).filter(InterbankTransfer.id == transfer_id).first()
+    if not transfer:
+        raise HTTPException(status_code=404, detail="Interbank transfer not found")
+
+    old_values = snapshot_model(transfer)
+    add_audit_log(db, actor_username, "DELETE", "InterbankTransfer", transfer.id, old_value=old_values, request=request)
+    db.delete(transfer)
+    db.commit()

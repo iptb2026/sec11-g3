@@ -41,7 +41,7 @@ def create_session(
 
 @router.get("/", response_model=list[SessionOut])
 def list_sessions(db: Session = Depends(get_db)):
-    return db.query(UserSession).all()
+    return db.query(UserSession).order_by(UserSession.id.desc()).all()
 
 
 @router.get("/{session_id}", response_model=SessionOut)

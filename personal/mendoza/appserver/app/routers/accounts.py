@@ -1,9 +1,11 @@
 # ==== LAYER 3: Account Configuration ====
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.audit import add_audit_log, snapshot_model
+from app.core.security import get_current_user
 from app.core.db_utils import commit_or_409
 from app.database.session import get_db
 from app.models.account import Account
@@ -11,11 +13,11 @@ from app.models.account_type import AccountType
 from app.models.user import User
 from app.schemas.account import AccountCreate, AccountUpdate, AccountOut
 
-router = APIRouter(prefix="/accounts", tags=["Layer 3 - Accounts"])
+router = APIRouter(prefix="/accounts", tags=["Layer 3 - Accounts"], dependencies=[Depends(get_current_user)])
 
 
 @router.post("/", response_model=AccountOut, status_code=status.HTTP_201_CREATED)
-def create_account(account: AccountCreate, db: Session = Depends(get_db)):
+def create_account(account: AccountCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     customer = db.query(User).filter(User.id == account.customer_id).first()
     if not customer:
         raise HTTPException(status_code=400, detail="customer_id does not exist")
@@ -39,6 +41,8 @@ def create_account(account: AccountCreate, db: Session = Depends(get_db)):
         ledger_balance=starting_balance,
     )
     db.add(new_account)
+    db.flush()
+    add_audit_log(db, actor_username, "CREATE", "Account", new_account.id, new_value=snapshot_model(new_account), request=request)
     db.commit()
     db.refresh(new_account)
     return new_account
@@ -46,7 +50,7 @@ def create_account(account: AccountCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=list[AccountOut])
 def list_accounts(db: Session = Depends(get_db)):
-    return db.query(Account).all()
+    return db.query(Account).order_by(Account.id.desc()).all()
 
 
 @router.get("/{account_id}", response_model=AccountOut)
@@ -58,7 +62,7 @@ def get_account(account_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{account_id}", response_model=AccountOut)
-def update_account(account_id: int, data: AccountUpdate, db: Session = Depends(get_db)):
+def update_account(account_id: int, data: AccountUpdate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     account = db.query(Account).filter(Account.id == account_id).first()
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
@@ -74,19 +78,22 @@ def update_account(account_id: int, data: AccountUpdate, db: Session = Depends(g
     if data.status == "CLOSED" and account.status != "CLOSED":
         account.closed_at = datetime.utcnow()
 
+    old_values = snapshot_model(account)
     for field, value in data.model_dump().items():
         setattr(account, field, value)
 
+    add_audit_log(db, actor_username, "UPDATE", "Account", account.id, old_value=old_values, new_value=snapshot_model(account), request=request)
     db.commit()
     db.refresh(account)
     return account
 
 
 @router.delete("/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_account(account_id: int, db: Session = Depends(get_db)):
+def delete_account(account_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
     account = db.query(Account).filter(Account.id == account_id).first()
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
 
+    add_audit_log(db, actor_username, "DELETE", "Account", account.id, old_value=snapshot_model(account), request=request)
     db.delete(account)
     commit_or_409(db, "Cannot delete this account — related transactions or records still reference it")

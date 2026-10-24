@@ -7,18 +7,12 @@
     </div>
 
     <q-table :rows="rows" :columns="columns" row-key="id" :loading="loading" flat bordered>
-      <template #body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn dense flat round icon="edit" color="primary" @click="openEdit(props.row)" />
-          <q-btn dense flat round icon="delete" color="negative" @click="removeRow(props.row)" />
-        </q-td>
-      </template>
     </q-table>
 
     <q-dialog v-model="showDialog">
       <q-card style="width: 420px">
         <q-card-section>
-          <div class="text-h6">{{ editingId ? 'Edit Deposit' : 'New Deposit' }}</div>
+          <div class="text-h6">New Deposit</div>
         </q-card-section>
 
         <q-card-section class="q-gutter-md">
@@ -52,14 +46,8 @@
             v-model="form.deposit_channel"
             label="Channel"
             filled
-            use-input
-            hide-selected
-            fill-input
-            input-debounce="0"
-            new-value-mode="add-unique"
-            :options="filteredChannelOptions"
-            @filter="filterChannelOptions"
-            hint="e.g. ONLINE, ATM, TELLER"
+            :options="channelOptions"
+            hint="Choose CASH, ATM, ONLINE, or INTERBANK"
           />
           <q-input v-model="form.remarks" label="Remarks" type="textarea" filled />
         </q-card-section>
@@ -85,37 +73,26 @@ const columns = [
   { name: 'account_id', label: 'Auto ID', field: 'account_id', align: 'left' },
   { name: 'account_number', label: 'Account Number', field: (row) => accountNumberByAccountId.value[row.account_id] || '', align: 'left' },
   { name: 'account_name', label: 'Account Name', field: (row) => accountHolderByAccountId.value[row.account_id] || '', align: 'left' },
+  { name: 'teller', label: 'Teller', field: (row) => userNameByUserId.value[row.deposited_by_user_id] || '—', align: 'left' },
   { name: 'reference_number', label: 'Reference', field: 'reference_number', align: 'left' },
   { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
   { name: 'deposit_channel', label: 'Channel', field: 'deposit_channel', align: 'left' },
   { name: 'transaction_date', label: 'Date', field: 'transaction_date', align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' },
 ]
 
 const rows = ref([])
 const accountOptions = ref([])
 const accountNumberByAccountId = ref({})
 const accountHolderByAccountId = ref({})
+const userNameByUserId = ref({})
 const loading = ref(false)
 const showDialog = ref(false)
-const editingId = ref(null)
 const emptyForm = () => ({ account_id: null, reference_number: '', amount: 0, deposit_channel: '', remarks: '' })
 const form = ref(emptyForm())
 
 const accountHolderName = computed(() => accountHolderByAccountId.value[form.value.account_id] || '')
 
-const channelOptions = ['ONLINE', 'ATM', 'TELLER']
-const filteredChannelOptions = ref(channelOptions)
-function filterChannelOptions (val, update) {
-  update(() => {
-    if (val === '') {
-      filteredChannelOptions.value = channelOptions
-    } else {
-      const needle = val.toLowerCase()
-      filteredChannelOptions.value = channelOptions.filter((v) => v.toLowerCase().includes(needle))
-    }
-  })
-}
+const channelOptions = ['CASH', 'ATM', 'ONLINE', 'INTERBANK']
 
 async function loadRows () {
   loading.value = true
@@ -132,8 +109,9 @@ async function loadOptions () {
 
   const nameByUserId = {}
   users.forEach((u) => {
-    nameByUserId[u.id] = `${u.first_name} ${u.last_name}`
+    nameByUserId[u.id] = `${u.first_name} ${u.last_name}`.trim()
   })
+  userNameByUserId.value = nameByUserId
 
   accountOptions.value = accounts.map((a) => ({
     label: a.account_number,
@@ -147,53 +125,22 @@ async function loadOptions () {
 }
 
 function openCreate () {
-  editingId.value = null
   form.value = emptyForm()
-  showDialog.value = true
-}
-
-function openEdit (row) {
-  editingId.value = row.id
-  form.value = {
-    account_id: row.account_id,
-    reference_number: row.reference_number,
-    amount: Number(row.amount),
-    deposit_channel: row.deposit_channel,
-    remarks: row.remarks,
-  }
   showDialog.value = true
 }
 
 async function save () {
   try {
-    if (editingId.value) {
-      await api.put(`/deposits/${editingId.value}`, form.value)
-    } else {
-      await api.post('/deposits/', form.value)
-    }
+    await api.post('/deposits/', form.value)
     showDialog.value = false
-    $q.notify({ type: 'positive', message: 'Deposit saved' })
-    loadRows()
+    $q.notify({ type: 'positive', message: 'Deposit recorded' })
+    await loadRows()
   } catch (err) {
-    $q.notify({ type: 'negative', message: err.response?.data?.detail || 'Save failed' })
+    $q.notify({
+      type: 'negative',
+      message: err.response?.data?.detail || 'Failed to record deposit'
+    })
   }
-}
-
-function removeRow (row) {
-  $q.dialog({
-    title: 'Confirm Delete',
-    message: `Delete deposit "${row.reference_number}"?`,
-    cancel: true,
-    persistent: true,
-  }).onOk(async () => {
-    try {
-      await api.delete(`/deposits/${row.id}`)
-      $q.notify({ type: 'positive', message: 'Deposit deleted' })
-      loadRows()
-    } catch (err) {
-      $q.notify({ type: 'negative', message: err.response?.data?.detail || 'Delete failed' })
-    }
-  })
 }
 
 onMounted(() => {
