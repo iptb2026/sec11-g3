@@ -17,12 +17,7 @@
       :rows-per-page-options="[0]"
     >
       <template v-slot:body="props">
-        <q-tr v-if="props.row.isGroupHeader" :key="props.row.key">
-          <q-td colspan="100%" class="bg-grey-2 text-weight-bold">
-            <q-icon name="person" class="q-mr-sm" />{{ props.row.groupLabel }}
-          </q-td>
-        </q-tr>
-        <q-tr v-else :key="rowKey(props.row)" :props="props">
+        <q-tr :key="rowKey(props.row)" :props="props">
           <q-td v-for="col in props.cols" :key="col.name" :props="props">
             <template v-if="col.name === 'actions'">
               <q-btn dense flat round icon="edit" color="primary" @click="openEdit(props.row)" />
@@ -104,7 +99,7 @@ const $q = useQuasar()
 const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'left' },
   { name: 'account_number', label: 'Account #', field: 'account_number', align: 'left' },
-  { name: 'customer_id', label: 'Customer ID', field: 'customer_id', align: 'left' },
+  { name: 'customer_id', label: 'Customer', field: 'customer_name', align: 'left' },
   { name: 'account_type_id', label: 'Type ID', field: 'account_type_id', align: 'left' },
   { name: 'available_balance', label: 'Available Balance', field: 'available_balance', align: 'right' },
   { name: 'ledger_balance', label: 'Ledger Balance', field: 'ledger_balance', align: 'right' },
@@ -119,11 +114,7 @@ const customerNameById = ref({})
 const loading = ref(false)
 
 function rowKey (row) {
-  return row.isGroupHeader ? row.key : `account-${row.id}`
-}
-
-function customerName (customerId) {
-  return customerNameById.value[Number(customerId)] || `Customer #${customerId}`
+  return `account-${row.id}`
 }
 
 const groupedRows = computed(() => {
@@ -131,32 +122,20 @@ const groupedRows = computed(() => {
     (row, index, allRows) =>
       allRows.findIndex(item => String(item.id) === String(row.id)) === index
   )
-  const sorted = uniqueRows.sort((a, b) => {
-    const nameA = customerName(a.customer_id)
-    const nameB = customerName(b.customer_id)
-    return nameA.localeCompare(nameB) ||
-      String(a.account_number ?? '').localeCompare(String(b.account_number ?? ''))
-  })
 
-  const result = []
-  let lastCustomerId = null
-
-  for (const row of sorted) {
-    const customerId = Number(row.customer_id)
-
-    if (customerId !== lastCustomerId) {
-      result.push({
-        isGroupHeader: true,
-        key: `group-${customerId}`,
-        groupLabel: customerName(customerId),
-      })
-      lastCustomerId = customerId
-    }
-
-    result.push(row)
-  }
-
-  return result
+  return uniqueRows
+    .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
+    .map(row => ({
+      ...row,
+      customer_name:
+        customerNameById.value[Number(row.customer_id)] ||
+        row.customer_name ||
+        row.customer?.full_name ||
+        row.customer?.name ||
+        (row.customer_id != null
+          ? `Customer #${row.customer_id}`
+          : 'Unknown Customer'),
+    }))
 })
 const showDialog = ref(false)
 const showDeleteDialog = ref(false)

@@ -69,7 +69,7 @@ export default defineConfig((/* ctx */) => {
       open: false,
       proxy: {
         '^/mendoza(/.*)?$': {
-          target: 'http://127.0.0.1:8000',
+          target: 'http://127.0.0.1:5000',
           changeOrigin: true,
           ws: true,
           rewrite: (path) => path.replace(/^\/mendoza/, '')
