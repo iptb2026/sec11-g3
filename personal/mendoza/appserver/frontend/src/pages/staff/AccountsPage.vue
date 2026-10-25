@@ -1,27 +1,99 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row items-center q-mb-md">
-      <div class="text-h5">Accounts</div>
-      <q-space />
-      <q-btn color="primary" icon="add" label="New" @click="openCreate" />
+  <q-page class="q-pa-md q-pa-sm-lg">
+    <!-- Page Hero Banner -->
+    <div class="page-hero-banner">
+      <div class="row items-center no-wrap">
+        <q-avatar size="48px" class="bg-lavender-gradient text-white shadow-md q-mr-md gt-xs">
+          <q-icon name="account_box" size="24px" />
+        </q-avatar>
+        <div>
+          <div class="row items-center">
+            <span class="text-h5 text-weight-bolder" style="color: #FFFFFF;">Accounts</span>
+            <q-badge color="accent" text-color="primary" class="q-ml-sm text-weight-bold">
+              {{ groupedRows.length }} Accounts
+            </q-badge>
+          </div>
+          <div class="text-caption" style="color: #777784;">Customer checking, savings, and institutional banking accounts.</div>
+        </div>
+      </div>
+
+      <div class="row items-center q-gutter-sm">
+        <q-input
+          v-model="filter"
+          dense
+          outlined
+          placeholder="Filter accounts..."
+          class="bg-white"
+          style="min-width: 200px;"
+        >
+          <template #prepend>
+            <q-icon name="search" color="primary" />
+          </template>
+          <template v-if="filter" #append>
+            <q-icon name="close" class="cursor-pointer" @click="filter = ''" />
+          </template>
+        </q-input>
+
+        <q-btn
+          color="primary"
+          icon="add"
+          label="New Account"
+          class="text-weight-bold"
+          unelevated
+          @click="openCreate"
+        />
+      </div>
     </div>
 
+    <!-- Modern Data Table -->
     <q-table
       :rows="groupedRows"
       :columns="columns"
       :row-key="rowKey"
+      :filter="filter"
       :loading="loading"
       flat
       bordered
-      :pagination="{ rowsPerPage: 0 }"
-      :rows-per-page-options="[0]"
+      class="modern-data-table"
+      :pagination="{ rowsPerPage: 15 }"
+      :rows-per-page-options="[15, 30, 50, 0]"
     >
       <template v-slot:body="props">
         <q-tr :key="rowKey(props.row)" :props="props">
           <q-td v-for="col in props.cols" :key="col.name" :props="props">
             <template v-if="col.name === 'actions'">
-              <q-btn dense flat round icon="edit" color="primary" @click="openEdit(props.row)" />
-              <q-btn dense flat round icon="delete" color="negative" @click="removeRow(props.row)" />
+              <div class="row items-center justify-end q-gutter-xs no-wrap">
+                <q-btn dense flat round icon="edit" color="primary" size="sm" @click="openEdit(props.row)">
+                  <q-tooltip>Edit Account</q-tooltip>
+                </q-btn>
+                <q-btn dense flat round icon="delete" color="negative" size="sm" @click="removeRow(props.row)">
+                  <q-tooltip>Delete Account</q-tooltip>
+                </q-btn>
+              </div>
+            </template>
+            <template v-else-if="col.name === 'account_number'">
+              <span class="text-weight-bold" style="font-family: monospace; color: #FFFFFF;">
+                {{ col.value }}
+              </span>
+            </template>
+            <template v-else-if="col.name === 'available_balance'">
+              <span class="text-weight-bolder text-positive">
+                ₱{{ Number(col.value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+              </span>
+            </template>
+            <template v-else-if="col.name === 'ledger_balance'">
+              <span class="text-weight-medium" style="color: #C50337;">
+                ₱{{ Number(col.value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+              </span>
+            </template>
+            <template v-else-if="col.name === 'status'">
+              <q-badge
+                :color="col.value === 'ACTIVE' ? 'positive' : 'grey-7'"
+                class="text-weight-bold"
+                style="padding: 4px 8px; font-size: 0.72rem;"
+              >
+                {{ col.value }}
+              </q-badge>
             </template>
             <template v-else>{{ col.value }}</template>
           </q-td>
@@ -29,18 +101,27 @@
       </template>
     </q-table>
 
+    <!-- Create / Edit Dialog -->
     <q-dialog v-model="showDialog">
-      <q-card style="width: 440px">
-        <q-card-section>
-          <div class="text-h6">{{ editingId ? 'Edit Account' : 'New Account' }}</div>
+      <q-card style="width: 460px; max-width: 95vw;" class="glass-card">
+        <q-card-section class="row items-center bg-lavender-soft-gradient q-py-md">
+          <q-avatar size="36px" color="primary" text-color="white" icon="account_box" class="q-mr-sm" />
+          <div>
+            <div class="text-h6 text-weight-bold" style="color: #FFFFFF;">
+              {{ editingId ? 'Edit Account' : 'New Account' }}
+            </div>
+            <div class="text-caption text-grey-7">Configure customer banking account settings</div>
+          </div>
         </q-card-section>
 
-        <q-card-section class="q-gutter-md">
-          <q-input v-model="form.account_number" label="Account Number" filled />
+        <q-separator />
+
+        <q-card-section class="q-gutter-md q-pt-md">
+          <q-input v-model="form.account_number" label="Account Number" outlined />
           <q-select
             v-model="form.customer_id"
             label="Customer"
-            filled
+            outlined
             emit-value
             map-options
             :options="customerOptions"
@@ -48,38 +129,49 @@
           <q-select
             v-model="form.account_type_id"
             label="Account Type"
-            filled
+            outlined
             emit-value
             map-options
             :options="accountTypeOptions"
           />
-          <q-input v-model="form.currency_code" label="Currency Code" filled />
-          <q-input v-model="form.branch_code" label="Branch Code" filled />
+          <q-input v-model="form.currency_code" label="Currency Code" outlined />
+          <q-input v-model="form.branch_code" label="Branch Code" outlined />
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn color="primary" label="Save" @click="save" />
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
+          <q-btn flat label="Cancel" color="grey-8" v-close-popup />
+          <q-btn unelevated color="primary" label="Save Account" class="text-weight-bold" @click="save" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
+    <!-- Confirm Delete Dialog -->
     <q-dialog v-model="showDeleteDialog" persistent>
-      <q-card style="min-width: 320px; max-width: 440px">
-        <q-card-section>
-          <div class="text-h6">Confirm Delete</div>
+      <q-card style="min-width: 320px; max-width: 440px;" class="glass-card">
+        <q-card-section class="row items-center bg-red-1 q-py-md">
+          <q-avatar size="36px" color="negative" text-color="white" icon="warning" class="q-mr-sm" />
+          <div>
+            <div class="text-h6 text-weight-bold" style="color: #991B1B;">Confirm Delete</div>
+            <div class="text-caption text-red-9">Irreversible action</div>
+          </div>
         </q-card-section>
 
-        <q-card-section>
+        <q-card-section class="q-pt-md">
           Are you sure you want to delete account
           <strong>{{ selectedRow?.account_number }}</strong>?
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup />
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
+          <q-btn flat label="Cancel" color="grey-8" v-close-popup />
           <q-btn
+            unelevated
             color="negative"
-            label="Delete"
+            label="Delete Account"
+            class="text-weight-bold"
             :loading="deleting"
             @click="deleteRow"
           />
@@ -108,6 +200,7 @@ const columns = [
 ]
 
 const rows = ref([])
+const filter = ref('')
 const customerOptions = ref([])
 const accountTypeOptions = ref([])
 const customerNameById = ref({})

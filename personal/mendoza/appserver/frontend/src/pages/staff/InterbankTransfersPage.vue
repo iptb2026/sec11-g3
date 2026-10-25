@@ -1,14 +1,96 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row items-center q-mb-md">
-      <div class="text-h5">Interbank Transfers</div>
-      <q-space />
-      <q-btn color="primary" icon="add" label="New" @click="openCreate" />
+  <q-page class="q-pa-md q-pa-sm-lg">
+    <!-- Page Hero Banner -->
+    <div class="page-hero-banner">
+      <div class="row items-center no-wrap">
+        <q-avatar size="48px" class="bg-lavender-gradient text-white shadow-md q-mr-md gt-xs">
+          <q-icon name="sync_alt" size="24px" />
+        </q-avatar>
+        <div>
+          <div class="row items-center">
+            <span class="text-h5 text-weight-bolder" style="color: #FFFFFF;">Interbank Transfers</span>
+            <q-badge color="accent" text-color="primary" class="q-ml-sm text-weight-bold">
+              {{ rows.length }} Records
+            </q-badge>
+          </div>
+          <div class="text-caption" style="color: #777784;">Manage outward fund transfers to external partner banking networks.</div>
+        </div>
+      </div>
+
+      <div class="row items-center q-gutter-sm">
+        <q-input
+          v-model="filter"
+          dense
+          outlined
+          placeholder="Filter interbank..."
+          class="bg-white"
+          style="min-width: 200px;"
+        >
+          <template #prepend>
+            <q-icon name="search" color="primary" />
+          </template>
+          <template v-if="filter" #append>
+            <q-icon name="close" class="cursor-pointer" @click="filter = ''" />
+          </template>
+        </q-input>
+
+        <q-btn
+          color="primary"
+          icon="add"
+          label="New Interbank Transfer"
+          class="text-weight-bold"
+          unelevated
+          @click="openCreate"
+        />
+      </div>
     </div>
 
-    <q-table class="interbank-transfers-table" :rows="rows" :columns="columns" row-key="id" :loading="loading" flat bordered>
-      <template #body-cell-actions="props">
+    <!-- Modern Data Table -->
+    <q-table
+      class="modern-data-table"
+      :rows="rows"
+      :columns="columns"
+      row-key="id"
+      :filter="filter"
+      :loading="loading"
+      flat
+      bordered
+      :pagination="{ rowsPerPage: 10 }"
+    >
+      <template #body-cell-reference_number="props">
         <q-td :props="props">
+          <span class="text-caption text-weight-medium" style="font-family: monospace; color: #FFFFFF;">
+            {{ props.value || '—' }}
+          </span>
+        </q-td>
+      </template>
+
+      <template #body-cell-amount="props">
+        <q-td :props="props" class="text-weight-bolder" style="color: #C50337;">
+          ₱{{ formatMoney(props.value) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-transfer_fee="props">
+        <q-td :props="props">
+          ₱{{ formatMoney(props.value) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-status="props">
+        <q-td :props="props">
+          <q-badge
+            :color="props.row.status === 'SUCCESS' ? 'positive' : (props.row.status === 'FAILED' ? 'negative' : 'warning')"
+            class="text-weight-bold"
+            style="padding: 4px 8px; font-size: 0.72rem;"
+          >
+            {{ props.row.status }}
+          </q-badge>
+        </q-td>
+      </template>
+
+      <template #body-cell-actions="props">
+        <q-td :props="props" class="q-gutter-xs">
           <q-btn
             v-if="props.row.status === 'PROCESSING'"
             dense flat round icon="check_circle" color="positive"
@@ -27,23 +109,26 @@
       </template>
     </q-table>
 
-      <template #body-cell-amount="props">
-        <q-td :props="props" class="text-no-wrap">
-          {{ formatMoney(props.value) }}
-        </q-td>
-      </template>
-
+    <!-- Create / Edit Dialog -->
     <q-dialog v-model="showDialog">
-      <q-card style="width: 460px">
-        <q-card-section>
-          <div class="text-h6">{{ editingId ? 'Edit Interbank Transfer' : 'New Interbank Transfer' }}</div>
+      <q-card style="width: 460px; max-width: 95vw;" class="glass-card">
+        <q-card-section class="row items-center bg-lavender-soft-gradient q-py-md">
+          <q-avatar size="36px" color="primary" text-color="white" icon="sync_alt" class="q-mr-sm" />
+          <div>
+            <div class="text-h6 text-weight-bold" style="color: #FFFFFF;">
+              {{ editingId ? 'Edit Interbank Transfer' : 'New Interbank Transfer' }}
+            </div>
+            <div class="text-caption text-grey-7">Transmit funds to external financial institution</div>
+          </div>
         </q-card-section>
 
-        <q-card-section class="q-gutter-md">
+        <q-separator />
+
+        <q-card-section class="q-gutter-md q-pt-md">
           <q-select
             v-model="form.source_account_id"
             label="Source Account"
-            filled
+            outlined
             emit-value
             map-options
             :options="accountOptions"
@@ -51,21 +136,23 @@
           <q-select
             v-model="form.target_bank_id"
             label="Target Bank"
-            filled
+            outlined
             emit-value
             map-options
             :options="bankOptions"
           />
-          <q-input v-model="form.target_account_number" label="Target Account Number" filled />
-          <q-input v-model="form.beneficiary_name" label="Beneficiary Name" filled />
-          <q-input v-model="form.reference_number" label="Reference Number" filled />
-          <q-input v-model.number="form.amount" label="Amount" type="number" filled />
-          <q-input v-model.number="form.transfer_fee" label="Transfer Fee" type="number" filled />
+          <q-input v-model="form.target_account_number" label="Target Account Number" outlined />
+          <q-input v-model="form.beneficiary_name" label="Beneficiary Name" outlined />
+          <q-input v-model="form.reference_number" label="Reference Number" outlined />
+          <q-input v-model.number="form.amount" label="Amount (PHP)" type="number" outlined />
+          <q-input v-model.number="form.transfer_fee" label="Transfer Fee (PHP)" type="number" outlined />
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn color="primary" label="Save" @click="save" />
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
+          <q-btn flat label="Cancel" color="grey-8" v-close-popup />
+          <q-btn unelevated color="primary" label="Save Transfer" class="text-weight-bold" @click="save" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -98,6 +185,7 @@ const columns = [
 ]
 
 const rows = ref([])
+const filter = ref('')
 const accountOptions = ref([])
 const bankOptions = ref([])
 const loading = ref(false)

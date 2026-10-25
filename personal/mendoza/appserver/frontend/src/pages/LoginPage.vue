@@ -1,54 +1,86 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
-      <q-page class="flex flex-center bg-grey-2">
-        <q-card style="width: 380px" bordered class="q-pa-md">
-          <q-card-section class="text-center">
-            <q-icon name="account_balance" size="48px" color="primary" />
-            <div class="text-h5 q-mt-sm">Mini Banking System</div>
-            <div class="text-caption text-grey-7">Sign in to continue</div>
-          </q-card-section>
+      <q-page class="flex flex-center bg-login-gradient q-pa-md" style="min-height: 100vh;">
+        <div style="width: 100%; max-width: 420px;">
+          <!-- Top Brand Emblem -->
+          <div class="text-center q-mb-md">
+            <div class="row justify-center q-mb-sm">
+              <BrandLogo :size="64" theme="dark" />
+            </div>
+            <div class="text-h4 text-weight-bolder text-white" style="letter-spacing: -0.02em;">MyBank</div>
+            <div class="text-caption text-weight-medium text-secondary">Secure Digital Banking Portal</div>
+          </div>
 
-          <q-card-section>
-            <q-form @submit="onSubmit" class="column q-gutter-md">
-              <q-input
-                v-model="username"
-                label="Username"
-                filled
-                autofocus
-                :rules="[(val) => !!val || 'Username is required']"
-              />
-              <q-input
-                v-model="password"
-                label="Password"
-                filled
-                :type="showPassword ? 'text' : 'password'"
-                :rules="[(val) => !!val || 'Password is required']"
-              >
-                <template #append>
-                  <q-icon
-                    :name="showPassword ? 'visibility_off' : 'visibility'"
-                    class="cursor-pointer"
-                    @click="showPassword = !showPassword"
-                  />
-                </template>
-              </q-input>
+          <!-- Glassmorphism Login Card -->
+          <q-card class="glass-card q-pa-lg">
+            <q-card-section class="q-pt-xs q-pb-md text-center">
+              <div class="text-h6 text-weight-bold text-white">Welcome Back</div>
+              <div class="text-caption text-secondary">Please sign in with your credentials</div>
+            </q-card-section>
 
-              <q-banner v-if="errorMessage" dense class="bg-red-1 text-red-9" rounded>
-                {{ errorMessage }}
-              </q-banner>
+            <q-card-section class="q-pa-none">
+              <q-form @submit="onSubmit" class="column q-gutter-md">
+                <q-input
+                  v-model="username"
+                  label="Username"
+                  outlined
+                  autofocus
+                  :rules="[(val) => !!val || 'Username is required']"
+                >
+                  <template #prepend>
+                    <q-icon name="person" color="primary" />
+                  </template>
+                </q-input>
 
-              <q-btn
-                type="submit"
-                label="Log In"
-                color="primary"
-                class="full-width"
-                :loading="loading"
-                unelevated
-              />
-            </q-form>
-          </q-card-section>
-        </q-card>
+                <q-input
+                  v-model="password"
+                  label="Password"
+                  outlined
+                  :type="showPassword ? 'text' : 'password'"
+                  :rules="[(val) => !!val || 'Password is required']"
+                >
+                  <template #prepend>
+                    <q-icon name="lock" color="primary" />
+                  </template>
+                  <template #append>
+                    <q-icon
+                      :name="showPassword ? 'visibility_off' : 'visibility'"
+                      class="cursor-pointer"
+                      @click="showPassword = !showPassword"
+                    />
+                  </template>
+                </q-input>
+
+                <!-- Error Alert -->
+                <q-banner v-if="errorMessage" dense class="bg-red-1 text-red-9 rounded-borders q-pa-sm">
+                  <template #avatar>
+                    <q-icon name="error_outline" color="negative" size="22px" />
+                  </template>
+                  <span class="text-caption text-weight-medium">{{ errorMessage }}</span>
+                </q-banner>
+
+                <q-btn
+                  type="submit"
+                  label="Sign In"
+                  icon-right="arrow_forward"
+                  color="primary"
+                  class="full-width q-py-sm text-weight-bold"
+                  size="md"
+                  :loading="loading"
+                  unelevated
+                  style="border-radius: 14px;"
+                />
+              </q-form>
+            </q-card-section>
+          </q-card>
+
+          <!-- Security Badge Footer -->
+          <div class="row items-center justify-center q-mt-lg text-caption text-secondary">
+            <q-icon name="verified_user" size="16px" color="positive" class="q-mr-xs" />
+            <span>256-bit SSL Encrypted • Multi-Tier Security</span>
+          </div>
+        </div>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -58,6 +90,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth-store'
+import BrandLogo from '@/components/BrandLogo.vue'
 
 const username = ref('')
 const password = ref('')

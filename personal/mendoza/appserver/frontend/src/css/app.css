@@ -1,1 +1,1165 @@
-/* app global css */
+/* ==========================================================================
+   MyBank - Luxury Dark Glassmorphism Design System (Champagne Gold & Obsidian)
+   Pure UI color elevation based on Champagne Gold, Bronze, and Deep Obsidian Glass
+   Optimized for High-Contrast Readability & Android Mobile Native Experience
+   ========================================================================== */
+
+:root {
+  /* Luxury Dark Palette */
+  --q-primary: #E5C583;
+  --q-secondary: #B8B2A7;
+  --q-accent: #D4AF37;
+  --q-dark: #08090C;
+  --q-positive: #34D399;
+  --q-negative: #FF453A;
+  --q-info: #38BDF8;
+  --q-warning: #FBBF24;
+
+  /* Champagne Gold & Obsidian Tokens */
+  --gold-primary: #E5C583;
+  --gold-bright: #FBF0D9;
+  --gold-accent: #D4AF37;
+  --gold-deep: #A47F35;
+  --gold-glow: rgba(212, 175, 55, 0.28);
+  --gold-border: rgba(229, 197, 131, 0.22);
+  --gold-border-focus: rgba(229, 197, 131, 0.5);
+
+  /* Obsidian & Frosted Glass Design Tokens */
+  --ios-bg: #08090C;
+  --ios-surface: #0E0F14;
+  --ios-card: rgba(14, 15, 20, 0.82);
+  --ios-card-solid: #111218;
+  --ios-card-border: rgba(229, 197, 131, 0.18);
+  --ios-card-highlight: rgba(245, 226, 186, 0.22);
+  --ios-glass-header: rgba(10, 11, 15, 0.88);
+  --ios-glass-drawer: #0A0B0F;
+
+  /* Typography Colors - Enhanced High Contrast */
+  --text-primary: #FFFFFF;
+  --text-gold: #E5C583;
+  --text-secondary: #B8B2A7;
+  --text-muted: #8E8A82;
+  --text-dim: #6C685F;
+
+  /* Status Tokens */
+  --ios-green: #34D399;
+  --ios-green-bg: rgba(52, 211, 153, 0.14);
+  --ios-red: #FF453A;
+  --ios-red-bg: rgba(255, 69, 58, 0.14);
+  --ios-pill-bg: rgba(229, 197, 131, 0.08);
+
+  /* Elevation Shadows & Radius */
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(245, 226, 186, 0.15);
+  --shadow-lg: 0 16px 48px -8px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(245, 226, 186, 0.22);
+  --shadow-specular: inset 0 1px 0 rgba(245, 226, 186, 0.25), inset 0 0 0 1px rgba(212, 175, 55, 0.06), 0 22px 48px -12px rgba(0, 0, 0, 0.85);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Backward Compatibility Aliases */
+  --crimson-primary: #E5C583;
+  --crimson-hover: #F8ECC9;
+  --crimson-deep: #1A1A1E;
+  --crimson-burgundy: #111218;
+  --crimson-pale: rgba(229, 197, 131, 0.1);
+  --crimson-soft: rgba(229, 197, 131, 0.05);
+  --crimson-ultra-light: #08090C;
+  --noir-black: #FFFFFF;
+  --muted-gray: #B8B2A7;
+  --surface-white: #111218;
+  --border-subtle: rgba(229, 197, 131, 0.14);
+  --border-focus: rgba(229, 197, 131, 0.48);
+}
+
+/* Base Body with Ambient Champagne Spotlight & Precision Grid Texture */
+body {
+  background-color: var(--ios-bg) !important;
+  color: var(--text-primary) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Google Sans', 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 48% at 50% -8%, rgba(212, 175, 55, 0.18) 0%, rgba(180, 140, 50, 0.06) 45%, transparent 75%),
+    radial-gradient(circle at 10% 16%, rgba(229, 197, 131, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 88% 26%, rgba(197, 160, 89, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(52, 211, 153, 0.04) 0%, transparent 50%),
+    linear-gradient(to right, rgba(229, 197, 131, 0.016) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(229, 197, 131, 0.016) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Custom Sleek Gold Glass Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(229, 197, 131, 0.22);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 197, 131, 0.45);
+}
+
+/* ==========================================================================
+   HIGH-CONTRAST TEXT & VISIBILITY OVERRIDES (PREVENTS BLENDING WITH BACKGROUND)
+   ========================================================================== */
+
+/* Global Headings & Typography */
+h1, h2, h3, h4, h5, h6,
+.text-h1,
+.text-h2,
+.text-h3,
+.text-h4,
+.text-h5,
+.text-h6,
+.text-subtitle1,
+.text-subtitle2 {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Captions and secondary text */
+.text-caption {
+  color: #C5BFB5 !important;
+}
+
+.text-secondary {
+  color: #C5BFB5 !important;
+}
+
+.text-muted {
+  color: #B8B2A7 !important;
+}
+
+.text-body1,
+.text-body2 {
+  color: #E2E8F0 !important;
+}
+
+/* List Item Labels */
+.q-item__label {
+  color: #FFFFFF !important;
+  font-weight: 500;
+}
+
+.q-item__label--caption {
+  color: #B8B2A7 !important;
+}
+
+.q-item-label--header {
+  color: #E5C583 !important;
+}
+
+/* Placeholders in inputs */
+input::placeholder,
+textarea::placeholder,
+.q-field__native::placeholder,
+.q-field__input::placeholder,
+.q-placeholder {
+  color: #A39F93 !important;
+  opacity: 1 !important;
+}
+
+/* Force dark grey classes to be clearly visible on obsidian dark background */
+.text-grey-6,
+.text-grey-7,
+.text-grey-8,
+.text-grey-9,
+.text-grey {
+  color: #C5BFB5 !important;
+}
+
+.text-grey-5,
+.text-grey-4,
+.text-grey-3,
+.text-grey-2,
+.text-grey-1 {
+  color: #E2E8F0 !important;
+}
+
+/* Inline color overrides for legacy templates & hardcoded colors */
+[style*="color: #02060E"],
+[style*="color:#02060E"],
+[style*="color: #000"],
+[style*="color:#000"],
+[style*="color: #111"],
+[style*="color:#111"],
+[style*="color: #1a1a1a"],
+[style*="color: #222"],
+[style*="color: #333"] {
+  color: #FFFFFF !important;
+}
+
+[style*="color: #777784"],
+[style*="color:#777784"],
+[style*="color: #6E6E78"],
+[style*="color:#6E6E78"],
+[style*="color: #8E8E93"],
+[style*="color:#8E8E93"],
+[style*="color: #94A3B8"],
+[style*="color:#94A3B8"],
+[style*="color: #A39F93"],
+[style*="color:#A39F93"],
+[style*="color: #666"],
+[style*="color:#666"],
+[style*="color: #777"],
+[style*="color: #888"] {
+  color: #C5BFB5 !important;
+}
+
+[style*="color: #FCE7EE"],
+[style*="color:#FCE7EE"] {
+  color: #FBF0D9 !important;
+}
+
+[style*="color: #C50337"],
+[style*="color:#C50337"] {
+  color: #E5C583 !important;
+}
+
+[style*="color: #991B1B"],
+[style*="color:#991B1B"] {
+  color: #FF6B6B !important;
+}
+
+/* Buttons with grey text */
+.q-btn.text-grey-8,
+.q-btn.text-grey-7,
+.q-btn.text-grey-6,
+.q-btn.text-grey,
+.q-btn--flat.text-grey-8,
+.q-btn--flat.text-grey-7 {
+  color: #E2E8F0 !important;
+}
+
+.q-btn.text-grey-8:hover,
+.q-btn.text-grey-7:hover,
+.q-btn--flat.text-grey-8:hover,
+.q-btn--flat.text-grey-7:hover {
+  color: #FFFFFF !important;
+  background: rgba(229, 197, 131, 0.12) !important;
+}
+
+/* Separators */
+.q-separator {
+  background: rgba(229, 197, 131, 0.12) !important;
+}
+
+/* Badges with grey backgrounds */
+.bg-grey-7,
+.bg-grey-8 {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #E2E8F0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Dialog actions backgrounds */
+.bg-grey-1 {
+  background: rgba(229, 197, 131, 0.04) !important;
+  color: #FFFFFF !important;
+}
+
+.bg-red-1 {
+  background: rgba(255, 69, 58, 0.14) !important;
+  color: #FF6B6B !important;
+}
+
+.text-red-9,
+.text-red-8 {
+  color: #FF6B6B !important;
+}
+
+/* Top App Header: Frosted Obsidian Glass */
+.q-header {
+  background: rgba(10, 11, 15, 0.88) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(229, 197, 131, 0.16) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7) !important;
+}
+
+.q-header .q-toolbar {
+  min-height: 64px;
+  padding: 0 16px;
+}
+
+.q-header .q-toolbar-title,
+.q-header .q-toolbar__title {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  overflow: visible !important;
+}
+
+/* Sidebar / Navigation Drawer */
+.q-drawer {
+  background: #0A0B0F !important;
+  border-right: 1px solid rgba(229, 197, 131, 0.12) !important;
+}
+
+.q-drawer .q-drawer__content {
+  overflow: hidden !important;
+}
+
+.border-top-subtle {
+  border-top: 1px solid rgba(229, 197, 131, 0.12) !important;
+}
+
+.border-bottom-subtle {
+  border-bottom: 1px solid rgba(229, 197, 131, 0.12) !important;
+}
+
+.q-drawer .q-item-label--header {
+  color: #9E988F !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  padding: 16px 20px 6px;
+}
+
+.q-drawer .q-item {
+  margin: 3px 12px;
+  border-radius: 14px;
+  color: #B8B2A7 !important;
+  font-weight: 500;
+  min-height: 44px;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  position: relative;
+}
+
+.q-drawer .q-item:hover {
+  background: rgba(229, 197, 131, 0.08) !important;
+  color: #FFFFFF !important;
+  transform: none;
+}
+
+/* Active Navigation Item (Champagne Gold Glass Pill Style) */
+.q-drawer .q-item.q-router-link--active,
+.q-drawer .q-item.q-item--active {
+  background: linear-gradient(90deg, rgba(229, 197, 131, 0.22) 0%, rgba(212, 175, 55, 0.06) 100%) !important;
+  border: 1px solid rgba(229, 197, 131, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(245, 226, 186, 0.25), 0 0 16px rgba(212, 175, 55, 0.12) !important;
+  color: #E5C583 !important;
+  font-weight: 600 !important;
+}
+
+.q-drawer .q-item.q-router-link--active::after,
+.q-drawer .q-item.q-item--active::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  background: #E5C583;
+  border-radius: 99px;
+  box-shadow: 0 0 10px rgba(229, 197, 131, 0.85);
+}
+
+.q-drawer .q-item.q-router-link--active .q-icon,
+.q-drawer .q-item.q-item--active .q-icon {
+  color: #E5C583 !important;
+}
+
+/* Page Hero Banner: Luxury Dark Glassmorphism */
+.page-hero-banner {
+  background: linear-gradient(135deg, rgba(18, 19, 26, 0.9) 0%, rgba(12, 13, 18, 0.9) 100%) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(229, 197, 131, 0.2) !important;
+  border-radius: 20px !important;
+  padding: 22px 26px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(245, 226, 186, 0.2) !important;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #FFFFFF !important;
+}
+
+/* Glassmorphism Cards with Champagne Specular Highlights */
+.q-card,
+.dashboard-stat-card,
+.glass-card {
+  border-radius: 20px !important;
+  border: 1px solid rgba(229, 197, 131, 0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.22),
+    inset 0 0 0 1px rgba(212, 175, 55, 0.05),
+    0 18px 45px -8px rgba(0, 0, 0, 0.75) !important;
+  background: rgba(14, 15, 20, 0.82) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  color: #FFFFFF !important;
+  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+  position: relative;
+}
+
+.q-card--bordered {
+  border: 1px solid rgba(229, 197, 131, 0.18) !important;
+}
+
+.dashboard-stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(229, 197, 131, 0.42) !important;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.38),
+    0 24px 54px -6px rgba(0, 0, 0, 0.85),
+    0 0 32px rgba(212, 175, 55, 0.15) !important;
+}
+
+.dashboard-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(229, 197, 131, 0.08) !important;
+  border: 1px solid rgba(229, 197, 131, 0.24);
+  color: #E5C583 !important;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.25), 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+}
+
+.dashboard-stat-card:hover .dashboard-icon-wrapper {
+  transform: scale(1.06);
+  border-color: rgba(229, 197, 131, 0.5);
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.4), 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.luxury-stat-trend {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  background: rgba(52, 211, 153, 0.14);
+  color: #34D399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.luxury-stat-trend.negative {
+  background: rgba(255, 69, 58, 0.14);
+  color: #FF453A;
+  border: 1px solid rgba(255, 69, 58, 0.3);
+}
+
+/* Gradients Overrides */
+.bg-lavender-gradient,
+.bg-crimson-gradient {
+  background: linear-gradient(135deg, rgba(229, 197, 131, 0.22) 0%, rgba(14, 15, 20, 0.95) 100%) !important;
+  border: 1px solid rgba(229, 197, 131, 0.25) !important;
+}
+
+.bg-lavender-soft-gradient,
+.bg-crimson-soft-gradient {
+  background: rgba(229, 197, 131, 0.05) !important;
+}
+
+.bg-login-gradient {
+  background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(212, 175, 55, 0.22) 0%, rgba(18, 19, 26, 0.85) 50%, #08090C 100%) !important;
+}
+
+/* Modern Tables: Sleek Dark Champagne Grid */
+.q-table__container,
+.modern-data-table {
+  border-radius: 20px !important;
+  border: 1px solid rgba(229, 197, 131, 0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.16),
+    0 18px 45px -10px rgba(0, 0, 0, 0.7) !important;
+  background: rgba(14, 15, 20, 0.85) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  color: #FFFFFF !important;
+  overflow: hidden;
+}
+
+.q-table thead tr {
+  background: rgba(229, 197, 131, 0.04) !important;
+  border-bottom: 1px solid rgba(229, 197, 131, 0.14) !important;
+}
+
+.q-table thead th {
+  color: #E5C583 !important;
+  font-weight: 700 !important;
+  font-size: 0.74rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.09em !important;
+  padding: 16px 20px !important;
+}
+
+.q-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.q-table tbody tr:hover {
+  background: rgba(229, 197, 131, 0.06) !important;
+}
+
+.q-table tbody td {
+  color: #FFFFFF !important;
+  font-size: 0.88rem;
+  padding: 15px 20px !important;
+  border-bottom: 1px solid rgba(229, 197, 131, 0.06) !important;
+}
+
+.q-table__bottom,
+.q-table__control,
+.q-table__bottom-item {
+  border-top: 1px solid rgba(229, 197, 131, 0.1) !important;
+  background: rgba(12, 13, 18, 0.95) !important;
+  color: #B8B2A7 !important;
+  font-weight: 500;
+}
+
+.q-table__bottom .q-btn {
+  color: #E5C583 !important;
+}
+
+.q-table__bottom .q-select .q-field__native {
+  color: #E5C583 !important;
+}
+
+/* Search Bar Pill / Champagne Capsule */
+.android-search-pill,
+.q-field--outlined.android-search-pill {
+  background: transparent !important;
+  border-radius: 999px !important;
+}
+
+.android-search-pill .q-field__control {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(229, 197, 131, 0.22) !important;
+  color: #FFFFFF !important;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.android-search-pill .q-field__control:before,
+.android-search-pill .q-field__control:after {
+  border-radius: 999px !important;
+}
+
+.android-search-pill .q-field__control:hover,
+.android-search-pill.q-field--focused .q-field__control {
+  background: rgba(229, 197, 131, 0.08) !important;
+  border-color: rgba(229, 197, 131, 0.5) !important;
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.2), inset 0 1px 0 rgba(245, 226, 186, 0.22) !important;
+}
+
+.android-search-pill .q-field__native,
+.android-search-pill .q-field__input {
+  color: #FFFFFF !important;
+}
+
+.android-search-pill .q-placeholder {
+  color: #B8B2A7 !important;
+}
+
+/* Modern Form Controls - High Contrast Visibility */
+.q-field--outlined .q-field__control {
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(229, 197, 131, 0.2) !important;
+  color: #FFFFFF !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.q-field--outlined .q-field__control:before,
+.q-field--outlined .q-field__control:after {
+  border-radius: 14px !important;
+}
+
+.q-field--outlined.q-field--focused .q-field__control {
+  border-color: rgba(229, 197, 131, 0.55) !important;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.22), inset 0 1px 0 rgba(245, 226, 186, 0.2);
+  background: rgba(229, 197, 131, 0.08) !important;
+}
+
+.q-field__native,
+.q-field__input {
+  color: #FFFFFF !important;
+  font-weight: 500;
+}
+
+.q-field__label {
+  color: #C5BFB5 !important;
+  font-weight: 500;
+}
+
+.q-field--focused .q-field__label {
+  color: #E5C583 !important;
+}
+
+.q-field__bottom,
+.q-field__messages,
+.q-field__hint {
+  color: #A39F93 !important;
+  font-size: 0.74rem;
+}
+
+.q-field.bg-white {
+  background: transparent !important;
+}
+
+.q-field.bg-white .q-field__control {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(229, 197, 131, 0.2) !important;
+  color: #FFFFFF !important;
+}
+
+/* Dropdown Menus & Popovers */
+.q-menu,
+.q-dialog .q-menu {
+  background: #111218 !important;
+  border: 1px solid rgba(229, 197, 131, 0.25) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85) !important;
+  border-radius: 14px !important;
+}
+
+.q-menu .q-item {
+  color: #E2E8F0 !important;
+  transition: all 0.15s ease;
+}
+
+.q-menu .q-item:hover,
+.q-menu .q-item.q-manual-focusable--focused {
+  background: rgba(229, 197, 131, 0.12) !important;
+  color: #E5C583 !important;
+}
+
+.q-menu .q-item.q-item--active {
+  background: rgba(229, 197, 131, 0.2) !important;
+  color: #E5C583 !important;
+  font-weight: 700;
+}
+
+/* Luxury Buttons: Champagne Gold Gloss */
+.q-btn {
+  border-radius: 12px !important;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.q-btn--unelevated.bg-primary {
+  background: linear-gradient(135deg, #FBF0D9 0%, #E5C583 45%, #C5A059 80%, #9D7B32 100%) !important;
+  color: #08090C !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(255, 240, 195, 0.8) !important;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+.q-btn--unelevated.bg-primary:hover {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5E2BA 45%, #D4AF37 80%, #AA8222 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(212, 175, 55, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.q-btn--outline {
+  border: 1px solid rgba(229, 197, 131, 0.28) !important;
+  color: #E5C583 !important;
+  background: rgba(229, 197, 131, 0.06) !important;
+  backdrop-filter: blur(12px);
+}
+
+.q-btn--outline:hover {
+  background: rgba(229, 197, 131, 0.14) !important;
+  border-color: rgba(229, 197, 131, 0.48) !important;
+}
+
+.q-btn--flat {
+  color: #B8B2A7 !important;
+}
+
+.q-btn--flat:hover {
+  color: #E5C583 !important;
+  background: rgba(229, 197, 131, 0.08) !important;
+}
+
+/* Badges & Chips */
+.q-badge {
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.q-chip {
+  border-radius: 8px;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+
+/* Dialogs & Modals */
+.q-dialog .q-card {
+  background: #111218 !important;
+  border: 1px solid rgba(229, 197, 131, 0.25) !important;
+  border-radius: 24px !important;
+  color: #FFFFFF !important;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.25),
+    0 30px 85px rgba(0, 0, 0, 0.9) !important;
+}
+
+.q-dialog .q-card-section {
+  color: #FFFFFF !important;
+}
+
+.q-dialog .q-card-actions {
+  background: rgba(229, 197, 131, 0.04) !important;
+  border-top: 1px solid rgba(229, 197, 131, 0.1);
+}
+
+/* Realistic Gold EMV Smart Microchip */
+.card-chip {
+  width: 44px;
+  height: 32px;
+  background: linear-gradient(135deg, #FBF0D9 0%, #E5C583 35%, #C5A059 70%, #9D7B32 100%);
+  border-radius: 7px;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  border: 1px solid rgba(164, 127, 53, 0.4);
+}
+
+.card-chip::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.card-chip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 45%;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Damascus Gold & Obsidian Fintech Card */
+.fintech-card {
+  position: relative;
+  background: linear-gradient(140deg, #181922 0%, #101117 50%, #090A0E 100%) !important;
+  color: #FFFFFF !important;
+  border-radius: 22px !important;
+  padding: 26px 28px;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.3),
+    inset 0 0 0 1px rgba(212, 175, 55, 0.08),
+    0 24px 55px -10px rgba(0, 0, 0, 0.85) !important;
+  overflow: hidden;
+  border: 1px solid rgba(229, 197, 131, 0.22) !important;
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.fintech-card:hover {
+  transform: translateY(-4px);
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.45),
+    0 30px 65px -8px rgba(0, 0, 0, 0.95),
+    0 0 35px rgba(212, 175, 55, 0.25) !important;
+  border-color: rgba(229, 197, 131, 0.4) !important;
+}
+
+.fintech-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgba(229, 197, 131, 0.04) 45%, rgba(245, 226, 186, 0.15) 50%, rgba(229, 197, 131, 0.04) 55%, transparent 65%);
+  pointer-events: none;
+}
+
+.fintech-card::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -50px;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, rgba(164, 127, 53, 0.12) 45%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.card-number-display {
+  font-family: 'SF Mono', 'Roboto Mono', 'Courier New', monospace;
+  font-size: 1.18rem;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  color: #E5C583;
+}
+
+/* Quick Actions Bar */
+.android-quick-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(14, 15, 20, 0.82) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  border: 1px solid rgba(229, 197, 131, 0.18) !important;
+  border-radius: 22px !important;
+  padding: 18px 16px;
+  margin-bottom: 24px;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.18),
+    0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+.android-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  gap: 8px;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+  cursor: pointer;
+}
+
+.android-action-btn:hover {
+  transform: translateY(-3px);
+}
+
+.android-action-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(229, 197, 131, 0.08) !important;
+  border: 1px solid rgba(229, 197, 131, 0.22) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #E5C583 !important;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.2), 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.25s ease;
+}
+
+.android-action-btn:hover .android-action-icon {
+  background: rgba(229, 197, 131, 0.18) !important;
+  border-color: rgba(229, 197, 131, 0.48) !important;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.35), 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.25) !important;
+}
+
+.android-action-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #C5BFB5 !important;
+  transition: color 0.2s ease;
+}
+
+.android-action-btn:hover .android-action-label {
+  color: #E5C583 !important;
+}
+
+/* Luxury Banking Module Button / Cards */
+.luxury-module-card {
+  display: block;
+  width: 100%;
+  padding: 16px 18px;
+  background: rgba(18, 19, 26, 0.72) !important;
+  border: 1px solid rgba(229, 197, 131, 0.16) !important;
+  border-radius: 18px !important;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.14), 0 6px 18px rgba(0, 0, 0, 0.4);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+  color: #FFFFFF !important;
+}
+
+.luxury-module-card:hover {
+  background: rgba(25, 26, 36, 0.88) !important;
+  border-color: rgba(229, 197, 131, 0.38) !important;
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.28), 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.12);
+}
+
+/* Transaction List Item Styling */
+.transaction-item {
+  display: flex;
+  align-items: center;
+  background: rgba(14, 15, 20, 0.82) !important;
+  border: 1px solid rgba(229, 197, 131, 0.16) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.12), 0 4px 14px rgba(0, 0, 0, 0.35);
+  transition: all 0.2s ease;
+}
+
+.transaction-item:hover {
+  background: rgba(20, 21, 29, 0.9) !important;
+  border-color: rgba(229, 197, 131, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+.transaction-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.transaction-icon-box.credit {
+  background: rgba(52, 211, 153, 0.14) !important;
+  color: #34D399 !important;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.transaction-icon-box.debit {
+  background: rgba(255, 69, 58, 0.14) !important;
+  color: #FF453A !important;
+  border: 1px solid rgba(255, 69, 58, 0.3);
+}
+
+.transaction-icon-box.transfer {
+  background: rgba(229, 197, 131, 0.14) !important;
+  color: #E5C583 !important;
+  border: 1px solid rgba(229, 197, 131, 0.32);
+}
+
+/* ==========================================================================
+   ANDROID & MOBILE OPTIMIZATIONS (NATIVE FEEL, FAB, DOCK & RESPONSIVE)
+   ========================================================================== */
+
+/* Android Floating Action Button (FAB) */
+.android-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 84px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #FBF0D9 0%, #E5C583 45%, #C5A059 80%, #9D7B32 100%) !important;
+  color: #08090C !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.7), 0 0 24px rgba(212, 175, 55, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  z-index: 1900;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+  border: 1px solid rgba(255, 240, 195, 0.85);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.android-fab .q-icon {
+  color: #08090C !important;
+  font-weight: 800;
+}
+
+.android-fab:active {
+  transform: scale(0.92);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), 0 0 16px rgba(212, 175, 55, 0.3) !important;
+}
+
+/* Mobile / Android Native Bottom Navigation Dock */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  background: rgba(10, 11, 15, 0.96) !important;
+  backdrop-filter: blur(28px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+  border-top: 1px solid rgba(229, 197, 131, 0.22) !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 2000;
+  padding: 0 8px calc(env(safe-area-inset-bottom, 0px) + 2px);
+  box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.7);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item,
+button.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #C5BFB5 !important;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+  min-width: 56px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item .q-icon,
+button.mobile-nav-item .q-icon {
+  color: #C5BFB5 !important;
+  transition: color 0.2s ease;
+}
+
+.mobile-nav-item:hover,
+button.mobile-nav-item:hover {
+  color: #FFFFFF !important;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item.router-link-active,
+.mobile-nav-item.router-link-exact-active {
+  color: #E5C583 !important;
+  font-weight: 700;
+}
+
+.mobile-nav-item.active .q-icon,
+.mobile-nav-item.router-link-active .q-icon,
+.mobile-nav-item.router-link-exact-active .q-icon {
+  color: #E5C583 !important;
+}
+
+.mobile-nav-item.active .nav-icon-wrap,
+.mobile-nav-item.router-link-active .nav-icon-wrap,
+.mobile-nav-item.router-link-exact-active .nav-icon-wrap {
+  background: rgba(229, 197, 131, 0.2) !important;
+  color: #E5C583 !important;
+  border: 1px solid rgba(229, 197, 131, 0.42);
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(245, 226, 186, 0.25);
+}
+
+.nav-icon-wrap {
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  transition: all 0.2s ease;
+}
+
+/* Modal Drawer Overlay on Mobile */
+.q-drawer--modal + .q-dialog__backdrop,
+.q-drawer__backdrop {
+  background: rgba(0, 0, 0, 0.78) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Mobile Screens Adjustments */
+@media (max-width: 599px) {
+  .q-header .q-toolbar {
+    min-height: 56px;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .q-header .q-toolbar__title {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    overflow: visible !important;
+  }
+
+  .q-page {
+    padding-bottom: 104px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .page-hero-banner {
+    padding: 16px 18px !important;
+    border-radius: 16px !important;
+    gap: 12px;
+  }
+
+  .page-hero-banner .text-h5 {
+    font-size: 1.22rem !important;
+  }
+
+  .android-quick-actions-bar {
+    padding: 14px 6px !important;
+    border-radius: 18px !important;
+    gap: 4px;
+  }
+
+  .android-action-icon {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 14px !important;
+  }
+
+  .android-action-label {
+    font-size: 0.68rem !important;
+  }
+
+  .fintech-card {
+    padding: 18px 20px !important;
+    border-radius: 18px !important;
+  }
+
+  .card-number-display {
+    font-size: 1.02rem !important;
+    letter-spacing: 0.14em !important;
+  }
+
+  .q-table__container,
+  .modern-data-table {
+    border-radius: 16px !important;
+  }
+
+  .q-table th,
+  .q-table td {
+    padding: 10px 12px !important;
+    font-size: 0.8rem;
+  }
+
+  .q-table__middle {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .q-dialog .q-card {
+    border-radius: 20px !important;
+    margin: 12px !important;
+  }
+}

@@ -9,7 +9,7 @@ from app.core.security import get_current_user, hash_password
 from app.database.session import get_db
 from app.models.role import Role
 from app.models.user import User
-from app.schemas.user import UserCreate, UserOut
+from app.schemas.user import UserCreate, UserOut, UserUpdate
 
 
 router = APIRouter(
@@ -39,14 +39,13 @@ def create_user(
         )
 
     existing = db.query(User).filter(
-        (User.username == user.username) |
-        (User.email == user.email)
+        User.username == user.username
     ).first()
 
     if existing:
         raise HTTPException(
             status_code=400,
-            detail="username or email already in use"
+            detail="username already in use"
         )
 
     data = user.model_dump(
@@ -104,7 +103,7 @@ def get_user(
 )
 def update_user(
     user_id: int,
-    user_data: UserCreate,
+    user_data: UserUpdate,
     request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     user = db.query(User).filter(
@@ -117,27 +116,62 @@ def update_user(
             detail="User not found"
         )
 
-    role = db.query(Role).filter(
-        Role.id == user_data.role_id
-    ).first()
+    if user_data.role_id is not None:
+        role = db.query(Role).filter(
+            Role.id == user_data.role_id
+        ).first()
 
-    if not role:
-        raise HTTPException(
-            status_code=400,
-            detail="role_id does not exist"
-        )
+        if not role:
+            raise HTTPException(
+                status_code=400,
+                detail="role_id does not exist"
+            )
+
+    # Check for username conflict with other users
+    if user_data.username:
+        existing = db.query(User).filter(
+            User.id != user_id,
+            User.username == user_data.username
+        ).first()
+
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail="username already in use"
+            )
 
     data = user_data.model_dump(
+        exclude_unset=True,
         exclude={"password"}
     )
+
+    # Sanitize empty strings to None for optional fields
+    for opt_field in ["email", "mobile_number", "middle_name", "date_of_birth"]:
+        if opt_field in data and (data[opt_field] == "" or data[opt_field] is None):
+            data[opt_field] = None
+
+    if "date_of_birth" in data and isinstance(data["date_of_birth"], str):
+        if data["date_of_birth"].strip():
+            from datetime import date
+            try:
+                data["date_of_birth"] = date.fromisoformat(data["date_of_birth"].strip())
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid date format for date_of_birth. Use YYYY-MM-DD.")
+        else:
+            data["date_of_birth"] = None
+
+    if "account_status" in data and data["account_status"]:
+        status_val = data["account_status"].upper()
+        if status_val not in ["ACTIVE", "LOCKED", "DISABLED"]:
+            raise HTTPException(status_code=400, detail="account_status must be ACTIVE, LOCKED, or DISABLED")
+        data["account_status"] = status_val
 
     old_values = snapshot_model(user)
     for field, value in data.items():
         setattr(user, field, value)
 
-    user.hashed_password = hash_password(
-        user_data.password
-    )
+    if user_data.password and user_data.password.strip():
+        user.hashed_password = hash_password(user_data.password.strip())
 
     add_audit_log(db, actor_username, "UPDATE", "User", user.id, old_value=old_values, new_value=snapshot_model(user), request=request)
     db.commit()

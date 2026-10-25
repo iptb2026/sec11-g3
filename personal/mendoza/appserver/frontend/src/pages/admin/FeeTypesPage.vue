@@ -1,26 +1,96 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row items-center q-mb-md">
-      <div class="text-h5">Fee Types</div>
-      <q-space />
-      <q-btn
-        color="primary"
-        icon="add"
-        label="New"
-        @click="openCreate"
-      />
+  <q-page class="q-pa-md q-pa-sm-lg">
+    <!-- Page Hero Banner -->
+    <div class="page-hero-banner">
+      <div class="row items-center no-wrap">
+        <q-avatar size="48px" class="bg-lavender-gradient text-white shadow-md q-mr-md gt-xs">
+          <q-icon name="sell" size="24px" />
+        </q-avatar>
+        <div>
+          <div class="row items-center">
+            <span class="text-h5 text-weight-bolder" style="color: #FFFFFF;">Fee Types</span>
+            <q-badge color="accent" text-color="primary" class="q-ml-sm text-weight-bold">
+              {{ rows.length }} Types
+            </q-badge>
+          </div>
+          <div class="text-caption" style="color: #777784;">Configure transaction charges, account maintenance fees, and fixed penalties.</div>
+        </div>
+      </div>
+
+      <div class="row items-center q-gutter-sm">
+        <q-input
+          v-model="filter"
+          dense
+          outlined
+          placeholder="Filter fee types..."
+          class="bg-white"
+          style="min-width: 200px;"
+        >
+          <template #prepend>
+            <q-icon name="search" color="primary" />
+          </template>
+          <template v-if="filter" #append>
+            <q-icon name="close" class="cursor-pointer" @click="filter = ''" />
+          </template>
+        </q-input>
+
+        <q-btn
+          color="primary"
+          icon="add"
+          label="New Fee Type"
+          class="text-weight-bold"
+          unelevated
+          @click="openCreate"
+        />
+      </div>
     </div>
 
+    <!-- Modern Data Table -->
     <q-table
+      class="modern-data-table"
       :rows="rows"
       :columns="columns"
       row-key="id"
+      :filter="filter"
       :loading="loading"
       flat
       bordered
+      :pagination="{ rowsPerPage: 10 }"
     >
-      <template #body-cell-actions="props">
+      <template #body-cell-fee_code="props">
         <q-td :props="props">
+          <q-chip
+            dense
+            color="accent"
+            text-color="primary"
+            class="text-weight-bold"
+            style="font-family: monospace; font-size: 0.75rem;"
+          >
+            {{ props.value }}
+          </q-chip>
+        </q-td>
+      </template>
+
+      <template #body-cell-fee_name="props">
+        <q-td :props="props">
+          <span class="text-weight-bold" style="color: #FFFFFF;">{{ props.value }}</span>
+        </q-td>
+      </template>
+
+      <template #body-cell-fixed_amount="props">
+        <q-td :props="props" class="text-weight-medium">
+          ₱{{ Number(props.value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-percentage_rate="props">
+        <q-td :props="props" class="text-weight-bold" style="color: #C50337;">
+          {{ props.value }}%
+        </q-td>
+      </template>
+
+      <template #body-cell-actions="props">
+        <q-td :props="props" class="q-gutter-xs">
           <q-btn
             dense
             flat
@@ -45,41 +115,52 @@
 
     <!-- Create/Edit dialog -->
     <q-dialog v-model="showDialog">
-      <q-card style="width: 420px; max-width: 95vw">
-        <q-card-section>
-          <div class="text-h6">
-            {{ editingId ? 'Edit Fee Type' : 'New Fee Type' }}
+      <q-card style="width: 440px; max-width: 95vw;" class="glass-card">
+        <q-card-section class="row items-center bg-lavender-soft-gradient q-py-md">
+          <q-avatar size="36px" color="primary" text-color="white" icon="sell" class="q-mr-sm" />
+          <div>
+            <div class="text-h6 text-weight-bold" style="color: #FFFFFF;">
+              {{ editingId ? 'Edit Fee Type' : 'New Fee Type' }}
+            </div>
+            <div class="text-caption text-grey-7">Define fee code, fixed amounts, and percentages</div>
           </div>
         </q-card-section>
 
-        <q-card-section class="q-gutter-md">
-          <q-input v-model="form.fee_code" label="Fee Code" filled />
-          <q-input v-model="form.fee_name" label="Fee Name" filled />
+        <q-separator />
+
+        <q-card-section class="q-gutter-md q-pt-md">
+          <q-input v-model="form.fee_code" label="Fee Code" outlined hint="e.g. ATM_WITHDRAWAL, OVERDRAFT" />
+          <q-input v-model="form.fee_name" label="Fee Name" outlined />
           <q-input
             v-model="form.fee_description"
             label="Description"
             type="textarea"
-            filled
+            outlined
+            rows="2"
           />
           <q-input
             v-model.number="form.fixed_amount"
-            label="Fixed Amount"
+            label="Fixed Amount (PHP)"
             type="number"
-            filled
+            outlined
           />
           <q-input
             v-model.number="form.percentage_rate"
             label="Percentage Rate %"
             type="number"
-            filled
+            outlined
           />
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup :disable="saving" />
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
+          <q-btn flat label="Cancel" color="grey-8" v-close-popup :disable="saving" />
           <q-btn
+            unelevated
             color="primary"
-            label="Save"
+            label="Save Fee Type"
+            class="text-weight-bold"
             :loading="saving"
             @click="save"
           />
@@ -89,28 +170,36 @@
 
     <!-- Delete confirmation dialog -->
     <q-dialog v-model="showDeleteDialog" persistent>
-      <q-card style="width: 400px; max-width: 95vw">
-        <q-card-section class="row items-center q-gutter-sm">
-          <q-icon name="warning" color="negative" size="md" />
-          <div class="text-h6">Confirm Delete</div>
+      <q-card style="width: 400px; max-width: 95vw;" class="glass-card">
+        <q-card-section class="row items-center bg-red-1 q-py-md">
+          <q-avatar size="36px" color="negative" text-color="white" icon="warning" class="q-mr-sm" />
+          <div>
+            <div class="text-h6 text-weight-bold" style="color: #991B1B;">Confirm Delete</div>
+            <div class="text-caption text-red-9">Irreversible action</div>
+          </div>
         </q-card-section>
 
-        <q-card-section>
+        <q-card-section class="q-pt-md">
           Are you sure you want to delete
           <strong>{{ selectedRow?.fee_name }}</strong>?
           This action cannot be undone.
         </q-card-section>
 
-        <q-card-actions align="right">
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
           <q-btn
             flat
             label="Cancel"
+            color="grey-8"
             :disable="deleting"
             @click="showDeleteDialog = false"
           />
           <q-btn
+            unelevated
             color="negative"
-            label="Delete"
+            label="Delete Fee Type"
+            class="text-weight-bold"
             :loading="deleting"
             @click="deleteRow"
           />
@@ -147,6 +236,7 @@ const columns = [
 ]
 
 const rows = ref([])
+const filter = ref('')
 const loading = ref(false)
 const saving = ref(false)
 const deleting = ref(false)

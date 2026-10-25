@@ -1,31 +1,105 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row items-center q-mb-md">
-      <div class="text-h5">Interest Records</div>
-      <q-space />
-      <q-btn color="primary" icon="add" label="New" @click="openCreate" />
+  <q-page class="q-pa-md q-pa-sm-lg">
+    <!-- Page Hero Banner -->
+    <div class="page-hero-banner">
+      <div class="row items-center no-wrap">
+        <q-avatar size="48px" class="bg-lavender-gradient text-white shadow-md q-mr-md gt-xs">
+          <q-icon name="savings" size="24px" />
+        </q-avatar>
+        <div>
+          <div class="row items-center">
+            <span class="text-h5 text-weight-bolder" style="color: #FFFFFF;">Interest Records</span>
+            <q-badge color="accent" text-color="primary" class="q-ml-sm text-weight-bold">
+              {{ rows.length }} Records
+            </q-badge>
+          </div>
+          <div class="text-caption" style="color: #777784;">Historical record of interest disbursements and credited yields.</div>
+        </div>
+      </div>
+
+      <div class="row items-center q-gutter-sm">
+        <q-input
+          v-model="filter"
+          dense
+          outlined
+          placeholder="Filter records..."
+          class="bg-white"
+          style="min-width: 200px;"
+        >
+          <template #prepend>
+            <q-icon name="search" color="primary" />
+          </template>
+          <template v-if="filter" #append>
+            <q-icon name="close" class="cursor-pointer" @click="filter = ''" />
+          </template>
+        </q-input>
+
+        <q-btn
+          color="primary"
+          icon="add"
+          label="New Record"
+          class="text-weight-bold"
+          unelevated
+          @click="openCreate"
+        />
+      </div>
     </div>
 
-    <q-table :rows="rows" :columns="columns" row-key="id" :loading="loading" flat bordered>
-      <template #body-cell-actions="props">
+    <!-- Modern Data Table -->
+    <q-table
+      class="modern-data-table"
+      :rows="rows"
+      :columns="columns"
+      row-key="id"
+      :filter="filter"
+      :loading="loading"
+      flat
+      bordered
+      :pagination="{ rowsPerPage: 10 }"
+    >
+      <template #body-cell-amount_credited="props">
+        <q-td :props="props" class="text-positive text-weight-bolder">
+          +₱{{ Number(props.value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-balance_before="props">
         <q-td :props="props">
+          ₱{{ Number(props.value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-balance_after="props">
+        <q-td :props="props" class="text-weight-bold" style="color: #FFFFFF;">
+          ₱{{ Number(props.value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-actions="props">
+        <q-td :props="props" class="q-gutter-xs">
           <q-btn dense flat round icon="delete" color="negative" @click="removeRow(props.row)" />
         </q-td>
       </template>
     </q-table>
 
-    <!-- balance_before / balance_after are computed by the backend, not part of this form -->
+    <!-- Create Dialog -->
     <q-dialog v-model="showDialog">
-      <q-card style="width: 420px">
-        <q-card-section>
-          <div class="text-h6">New Interest Record</div>
+      <q-card style="width: 440px; max-width: 95vw;" class="glass-card">
+        <q-card-section class="row items-center bg-lavender-soft-gradient q-py-md">
+          <q-avatar size="36px" color="primary" text-color="white" icon="savings" class="q-mr-sm" />
+          <div>
+            <div class="text-h6 text-weight-bold" style="color: #FFFFFF;">New Interest Record</div>
+            <div class="text-caption text-grey-7">Credit yield or interest disbursement to account</div>
+          </div>
         </q-card-section>
 
-        <q-card-section class="q-gutter-md">
+        <q-separator />
+
+        <q-card-section class="q-gutter-md q-pt-md">
           <q-select
             v-model="form.account_id"
             label="Account"
-            filled
+            outlined
             emit-value
             map-options
             :options="accountOptions"
@@ -33,17 +107,19 @@
           <q-select
             v-model="form.policy_id"
             label="Interest Policy"
-            filled
+            outlined
             emit-value
             map-options
             :options="policyOptions"
           />
-          <q-input v-model.number="form.amount_credited" label="Amount Credited" type="number" filled />
+          <q-input v-model.number="form.amount_credited" label="Amount Credited (PHP)" type="number" outlined />
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn color="primary" label="Save" @click="save" />
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
+          <q-btn flat label="Cancel" color="grey-8" v-close-popup />
+          <q-btn unelevated color="primary" label="Save Record" class="text-weight-bold" @click="save" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -69,6 +145,7 @@ const columns = [
 ]
 
 const rows = ref([])
+const filter = ref('')
 const accountOptions = ref([])
 const policyOptions = ref([])
 const loading = ref(false)

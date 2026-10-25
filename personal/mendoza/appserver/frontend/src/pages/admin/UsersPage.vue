@@ -1,21 +1,87 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="row items-center q-mb-md">
-      <div class="text-h5">Users</div>
-      <q-space />
-      <q-btn color="primary" icon="add" label="New" @click="openCreate" />
+  <q-page class="q-pa-md q-pa-sm-lg">
+    <!-- Page Hero Banner -->
+    <div class="page-hero-banner">
+      <div class="row items-center no-wrap">
+        <q-avatar size="48px" class="bg-lavender-gradient text-white shadow-md q-mr-md gt-xs">
+          <q-icon name="people" size="24px" />
+        </q-avatar>
+        <div>
+          <div class="row items-center">
+            <span class="text-h5 text-weight-bolder" style="color: #FFFFFF;">System Users</span>
+            <q-badge color="accent" text-color="primary" class="q-ml-sm text-weight-bold">
+              {{ rows.length }} Accounts
+            </q-badge>
+          </div>
+          <div class="text-caption" style="color: #777784;">Manage customer accounts, teller staff credentials, and admin privileges.</div>
+        </div>
+      </div>
+
+      <div class="row items-center q-gutter-sm">
+        <q-input
+          v-model="filter"
+          dense
+          outlined
+          placeholder="Filter users..."
+          class="bg-white"
+          style="min-width: 200px;"
+        >
+          <template #prepend>
+            <q-icon name="search" color="primary" />
+          </template>
+          <template v-if="filter" #append>
+            <q-icon name="close" class="cursor-pointer" @click="filter = ''" />
+          </template>
+        </q-input>
+
+        <q-btn
+          color="primary"
+          icon="add"
+          label="New User"
+          class="text-weight-bold"
+          unelevated
+          @click="openCreate"
+        />
+      </div>
     </div>
 
+    <!-- Modern Data Table -->
     <q-table
+      class="modern-data-table"
       :rows="rows"
       :columns="columns"
       row-key="id"
+      :filter="filter"
       :loading="loading"
       flat
       bordered
+      :pagination="{ rowsPerPage: 10 }"
     >
-      <template #body-cell-actions="props">
+      <template #body-cell-username="props">
         <q-td :props="props">
+          <div class="row items-center no-wrap">
+            <q-avatar size="28px" color="accent" text-color="primary" class="text-weight-bold q-mr-sm" style="font-size: 0.75rem;">
+              {{ (props.value || 'U').charAt(0).toUpperCase() }}
+            </q-avatar>
+            <span class="text-weight-bold" style="color: #FFFFFF;">{{ props.value }}</span>
+          </div>
+        </q-td>
+      </template>
+
+      <template #body-cell-account_status="props">
+        <q-td :props="props">
+          <q-badge
+            :color="props.value === 'ACTIVE' ? 'positive' : 'grey-7'"
+            class="text-weight-bold"
+            style="padding: 4px 8px; font-size: 0.72rem;"
+          >
+            {{ props.value || 'ACTIVE' }}
+          </q-badge>
+        </q-td>
+      </template>
+
+      <template #body-cell-actions="props">
+        <q-td :props="props" class="q-gutter-xs">
           <q-btn
             dense flat round icon="edit" color="primary"
             @click="openEdit(props.row)"
@@ -30,54 +96,70 @@
 
     <!-- Create / Edit User Dialog -->
     <q-dialog v-model="showDialog" persistent>
-      <q-card style="width: 460px; max-width: 95vw">
-        <q-card-section>
-          <div class="text-h6">
-            {{ editingId ? 'Edit User' : 'New User' }}
+      <q-card style="width: 480px; max-width: 95vw;" class="glass-card">
+        <q-card-section class="row items-center bg-lavender-soft-gradient q-py-md">
+          <q-avatar size="36px" color="primary" text-color="white" icon="person_add" class="q-mr-sm" />
+          <div>
+            <div class="text-h6 text-weight-bold" style="color: #FFFFFF;">
+              {{ editingId ? 'Edit User' : 'New User' }}
+            </div>
+            <div class="text-caption text-grey-7">Configure user account credentials and role</div>
           </div>
         </q-card-section>
 
-        <q-card-section class="q-gutter-md">
-          <q-input v-model="form.username" label="Username" filled />
+        <q-separator />
+
+        <q-card-section class="q-gutter-md q-pt-md" style="max-height: 70vh; overflow-y: auto;">
+          <q-input v-model="form.username" label="Username" outlined />
           <q-input
             v-model="form.password"
             label="Password"
             type="password"
-            filled
+            outlined
             :hint="editingId ? 'Leave blank to keep the existing password, if supported by the backend' : 'Enter the user password'"
           />
-          <q-input v-model="form.email" label="Email" filled />
-          <q-input v-model="form.mobile_number" label="Mobile Number" filled />
-          <q-input v-model="form.first_name" label="First Name" filled />
-          <q-input v-model="form.middle_name" label="Middle Name" filled />
-          <q-input v-model="form.last_name" label="Last Name" filled />
+          <q-input v-model="form.email" label="Email Address" outlined />
+          <q-input v-model="form.mobile_number" label="Mobile Number" outlined />
+          <div class="row q-col-gutter-sm">
+            <div class="col-6">
+              <q-input v-model="form.first_name" label="First Name" outlined />
+            </div>
+            <div class="col-6">
+              <q-input v-model="form.last_name" label="Last Name" outlined />
+            </div>
+          </div>
+          <q-input v-model="form.middle_name" label="Middle Name (Optional)" outlined />
           <q-input
             v-model="form.date_of_birth"
             label="Date of Birth"
-            filled
+            outlined
             hint="YYYY-MM-DD"
           />
           <q-select
             v-model="form.role_id"
             label="Role"
-            filled
+            outlined
             emit-value
             map-options
             :options="roleOptions"
           />
-          <q-input
+          <q-select
             v-model="form.account_status"
             label="Account Status"
-            filled
-            hint="e.g. ACTIVE"
+            outlined
+            :options="['ACTIVE', 'LOCKED', 'DISABLED']"
           />
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup :disable="saving" />
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
+          <q-btn flat label="Cancel" color="grey-8" v-close-popup :disable="saving" />
           <q-btn
+            unelevated
             color="primary"
-            label="Save"
+            label="Save User"
+            class="text-weight-bold"
             :loading="saving"
             @click="save"
           />
@@ -87,29 +169,36 @@
 
     <!-- Delete Confirmation Dialog -->
     <q-dialog v-model="showDeleteDialog" persistent>
-      <q-card style="width: 400px; max-width: 95vw">
-        <q-card-section>
-          <div class="text-h6">Confirm Delete</div>
+      <q-card style="width: 400px; max-width: 95vw;" class="glass-card">
+        <q-card-section class="row items-center bg-red-1 q-py-md">
+          <q-avatar size="36px" color="negative" text-color="white" icon="warning" class="q-mr-sm" />
+          <div>
+            <div class="text-h6 text-weight-bold" style="color: #991B1B;">Confirm Delete</div>
+            <div class="text-caption text-red-9">Irreversible action</div>
+          </div>
         </q-card-section>
 
-        <q-card-section>
+        <q-card-section class="q-pt-md">
           Are you sure you want to delete user
           <strong>{{ selectedRow?.username }}</strong>?
           This action cannot be undone.
         </q-card-section>
 
-        <q-card-actions align="right">
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1">
           <q-btn
             flat
             label="Cancel"
-            color="grey"
+            color="grey-8"
             :disable="deleting"
             @click="showDeleteDialog = false"
           />
           <q-btn
-            flat
-            label="Delete"
+            unelevated
             color="negative"
+            label="Delete User"
+            class="text-weight-bold"
             :loading="deleting"
             @click="deleteRow"
           />
@@ -123,8 +212,10 @@
 import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 import api from '@/services/api'
+import { useAuthStore } from '@/stores/auth-store'
 
 const $q = useQuasar()
+const auth = useAuthStore()
 
 const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'left' },
@@ -138,6 +229,7 @@ const columns = [
 ]
 
 const rows = ref([])
+const filter = ref('')
 const roleOptions = ref([])
 const loading = ref(false)
 const saving = ref(false)
@@ -226,12 +318,58 @@ async function save () {
     const payload = { ...form.value }
 
     // When editing, don't send an empty password.
-    if (editingId.value && !payload.password) {
+    if (!payload.password || !payload.password.trim()) {
       delete payload.password
+    } else {
+      payload.password = payload.password.trim()
     }
+
+    // Clean up empty optional fields so backend gets null instead of invalid empty strings
+    if (!payload.email || !payload.email.trim()) {
+      payload.email = null
+    } else {
+      payload.email = payload.email.trim()
+    }
+
+    if (!payload.mobile_number || !payload.mobile_number.trim()) {
+      payload.mobile_number = null
+    } else {
+      payload.mobile_number = payload.mobile_number.trim()
+    }
+
+    if (!payload.middle_name || !payload.middle_name.trim()) {
+      payload.middle_name = null
+    } else {
+      payload.middle_name = payload.middle_name.trim()
+    }
+
+    if (!payload.date_of_birth || !payload.date_of_birth.trim()) {
+      payload.date_of_birth = null
+    } else {
+      payload.date_of_birth = payload.date_of_birth.trim()
+    }
+
+    if (payload.first_name) payload.first_name = payload.first_name.trim()
+    if (payload.last_name) payload.last_name = payload.last_name.trim()
+    if (payload.username) payload.username = payload.username.trim()
 
     if (editingId.value) {
       await api.put(`/users/${editingId.value}`, payload)
+
+      // If user edited their own details, update the auth store
+      if (auth.userId === editingId.value) {
+        if (payload.username) auth.username = payload.username
+        if (payload.first_name) auth.firstName = payload.first_name
+        if (payload.last_name) auth.lastName = payload.last_name
+        if (payload.role_id) {
+          auth.roleId = payload.role_id
+          const selectedRole = roleOptions.value.find((r) => r.value === payload.role_id)
+          if (selectedRole) {
+            auth.roleName = selectedRole.label.split(' - ')[1] || auth.roleName
+          }
+        }
+        auth.persist()
+      }
     } else {
       await api.post('/users/', payload)
     }
@@ -240,9 +378,13 @@ async function save () {
     $q.notify({ type: 'positive', message: 'User saved successfully' })
     await loadRows()
   } catch (err) {
+    const detail = err.response?.data?.detail
+    const msg = Array.isArray(detail)
+      ? detail.map((d) => d.msg || `${d.loc?.slice(-1)[0]}: ${d.type}`).join(', ')
+      : (detail || 'Save failed')
     $q.notify({
       type: 'negative',
-      message: err.response?.data?.detail || 'Save failed',
+      message: msg,
     })
   } finally {
     saving.value = false

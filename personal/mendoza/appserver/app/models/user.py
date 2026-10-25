@@ -14,7 +14,7 @@ class User(Base):
 
     hashed_password = Column(String(255), nullable=False)
 
-    email = Column(String(150), unique=True, nullable=True)
+    email = Column(String(255), unique=False, nullable=True)
 
     mobile_number = Column(String(30), nullable=True)
 
