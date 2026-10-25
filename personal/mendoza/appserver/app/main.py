@@ -30,7 +30,10 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.APP_NAME,
-    version=settings.APP_VERSION
+    version=settings.APP_VERSION,
+    docs_url="/docs",
+    openapi_url="/openapi.json",
+    swagger_ui_parameters={"url": "/mendoza/openapi.json"},
 )
 
 # ==== LAYER 1 ====

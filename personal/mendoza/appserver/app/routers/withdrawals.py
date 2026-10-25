@@ -6,6 +6,7 @@ from app.core.audit import add_audit_log, snapshot_model
 from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
+from app.models.ledger_entry import LedgerEntry
 from app.models.user import User
 from app.models.withdrawal import Withdrawal
 from app.models.withdrawal_limit import WithdrawalLimit
@@ -51,6 +52,17 @@ def create_withdrawal(withdrawal: WithdrawalCreate, request: Request, actor_user
 
     account.available_balance -= withdrawal.amount
     account.ledger_balance -= withdrawal.amount
+
+    db.add(LedgerEntry(
+        account_id=account.id,
+        transaction_reference=new_withdrawal.reference_number,
+        transaction_type="WITHDRAWAL",
+        debit_amount=new_withdrawal.amount,
+        credit_amount=0,
+        balance_after=account.available_balance,
+        transaction_date=new_withdrawal.transaction_date,
+    ))
+
     if limit:
         limit.daily_used_amount += withdrawal.amount
 
@@ -83,31 +95,17 @@ def get_withdrawal(withdrawal_id: int, db: Session = Depends(get_db)):
     return withdrawal
 
 
-@router.put("/{withdrawal_id}", response_model=WithdrawalOut)
-def update_withdrawal(withdrawal_id: int, data: WithdrawalCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    """NOTE: does not re-adjust the account balance or the daily limit usage — see the Layer 4 guide."""
-    withdrawal = db.query(Withdrawal).filter(Withdrawal.id == withdrawal_id).first()
-    if not withdrawal:
-        raise HTTPException(status_code=404, detail="Withdrawal not found")
-
-    old_values = snapshot_model(withdrawal)
-    for field, value in data.model_dump().items():
-        setattr(withdrawal, field, value)
-
-    add_audit_log(db, actor_username, "UPDATE", "Withdrawal", withdrawal.id, old_value=old_values, new_value=snapshot_model(withdrawal), request=request)
-    db.commit()
-    db.refresh(withdrawal)
-    return withdrawal
+@router.put("/{withdrawal_id}")
+def update_withdrawal(withdrawal_id: int):
+    raise HTTPException(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        detail="Withdrawal records are immutable; use a reversal transaction for corrections."
+    )
 
 
-@router.delete("/{withdrawal_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_withdrawal(withdrawal_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
-    """NOTE: does not reverse the account balance or the daily limit usage — see the Layer 4 guide."""
-    withdrawal = db.query(Withdrawal).filter(Withdrawal.id == withdrawal_id).first()
-    if not withdrawal:
-        raise HTTPException(status_code=404, detail="Withdrawal not found")
-
-    old_values = snapshot_model(withdrawal)
-    add_audit_log(db, actor_username, "DELETE", "Withdrawal", withdrawal.id, old_value=old_values, request=request)
-    db.delete(withdrawal)
-    db.commit()
+@router.delete("/{withdrawal_id}", status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
+def delete_withdrawal(withdrawal_id: int):
+    raise HTTPException(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        detail="Withdrawal records are immutable and cannot be deleted."
+    )

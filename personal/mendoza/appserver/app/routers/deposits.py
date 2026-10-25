@@ -6,6 +6,7 @@ from app.core.audit import add_audit_log, snapshot_model
 from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
+from app.models.ledger_entry import LedgerEntry
 from app.models.deposit import Deposit
 from app.models.user import User
 from app.schemas.deposit import DepositCreate, DepositOut
@@ -43,6 +44,16 @@ def create_deposit(deposit: DepositCreate, request: Request, actor_username: str
     # This is the actual point of a deposit: money enters the account.
     account.available_balance += deposit.amount
     account.ledger_balance += deposit.amount
+
+    db.add(LedgerEntry(
+        account_id=account.id,
+        transaction_reference=new_deposit.reference_number,
+        transaction_type="DEPOSIT",
+        debit_amount=0,
+        credit_amount=new_deposit.amount,
+        balance_after=account.available_balance,
+        transaction_date=new_deposit.transaction_date,
+    ))
 
     owner_id = account.customer_id
     db.flush()

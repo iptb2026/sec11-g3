@@ -8,6 +8,7 @@ from app.core.audit import add_audit_log, snapshot_model
 from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
+from app.models.ledger_entry import LedgerEntry
 from app.models.transfer import Transfer
 from app.schemas.transfer import TransferCreate, TransferOut
 from app.routers.notifications import create_and_send_notification
@@ -61,6 +62,27 @@ def create_transfer(transfer: TransferCreate, request: Request, actor_username: 
     source.ledger_balance -= transfer.amount
     destination.available_balance += transfer.amount
     destination.ledger_balance += transfer.amount
+
+    db.add_all([
+        LedgerEntry(
+            account_id=source.id,
+            transaction_reference=new_transfer.transfer_reference,
+            transaction_type="TRANSFER_DEBIT",
+            debit_amount=new_transfer.amount,
+            credit_amount=0,
+            balance_after=source.available_balance,
+            transaction_date=new_transfer.completed_at,
+        ),
+        LedgerEntry(
+            account_id=destination.id,
+            transaction_reference=new_transfer.transfer_reference,
+            transaction_type="TRANSFER_CREDIT",
+            debit_amount=0,
+            credit_amount=new_transfer.amount,
+            balance_after=destination.available_balance,
+            transaction_date=new_transfer.completed_at,
+        ),
+    ])
 
     source_owner_id = source.customer_id
     destination_owner_id = destination.customer_id
