@@ -162,17 +162,26 @@ const form = ref(emptyForm())
 
 async function loadRows () {
   loading.value = true
-  const { data } = await api.get('/fee-records/')
-  rows.value = data
-  loading.value = false
+  try {
+    const { data } = await api.get('/fee-records/')
+    rows.value = data
+  } catch (err) {
+    $q.notify({ type: 'negative', message: err.response?.data?.detail || 'Failed to load fee records' })
+  } finally {
+    loading.value = false
+  }
 }
 
 async function loadOptions () {
-  const { data: accounts } = await api.get('/accounts/')
-  accountOptions.value = accounts.map((a) => ({ label: a.account_number, value: a.id }))
+  try {
+    const { data: accounts } = await api.get('/accounts/')
+    accountOptions.value = accounts.map((a) => ({ label: a.account_number, value: a.id }))
 
-  const { data: feeTypes } = await api.get('/fee-types/')
-  feeTypeOptions.value = feeTypes.map((f) => ({ label: `${f.fee_code} - ${f.fee_name}`, value: f.id }))
+    const { data: feeTypes } = await api.get('/fee-types/')
+    feeTypeOptions.value = feeTypes.map((f) => ({ label: `${f.fee_code} - ${f.fee_name}`, value: f.id }))
+  } catch (err) {
+    console.error('Failed to load fee options:', err)
+  }
 }
 
 function openCreate () {

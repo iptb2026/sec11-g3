@@ -10,6 +10,7 @@
       }"
     >
       <img
+        v-if="!imgError"
         :src="logoUrl"
         :width="size"
         :height="size"
@@ -22,6 +23,13 @@
           borderRadius: Math.max(badgeRadius - 2, 4) + 'px',
           display: 'block'
         }"
+        @error="imgError = true"
+      />
+      <q-icon
+        v-else
+        name="account_balance"
+        :size="Math.round(size * 0.6) + 'px'"
+        color="primary"
       />
     </div>
 
@@ -62,8 +70,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import logoUrl from '@/assets/logo.png'
+
+const imgError = ref(false)
 
 const props = defineProps({
   size: { type: [Number, String], default: 36 },

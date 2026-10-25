@@ -186,32 +186,44 @@ const channelOptions = ['CASH', 'ATM', 'ONLINE', 'INTERBANK']
 
 async function loadRows () {
   loading.value = true
-  const { data } = await api.get('/deposits/')
-  rows.value = data
-  loading.value = false
+  try {
+    const { data } = await api.get('/deposits/')
+    rows.value = data
+  } catch (err) {
+    $q.notify({
+      type: 'negative',
+      message: err.response?.data?.detail || 'Failed to load deposits',
+    })
+  } finally {
+    loading.value = false
+  }
 }
 
 async function loadOptions () {
-  const [{ data: accounts }, { data: users }] = await Promise.all([
-    api.get('/accounts/'),
-    api.get('/users/'),
-  ])
+  try {
+    const [{ data: accounts }, { data: users }] = await Promise.all([
+      api.get('/accounts/'),
+      api.get('/users/'),
+    ])
 
-  const nameByUserId = {}
-  users.forEach((u) => {
-    nameByUserId[u.id] = `${u.first_name} ${u.last_name}`.trim()
-  })
-  userNameByUserId.value = nameByUserId
+    const nameByUserId = {}
+    users.forEach((u) => {
+      nameByUserId[u.id] = `${u.first_name} ${u.last_name}`.trim()
+    })
+    userNameByUserId.value = nameByUserId
 
-  accountOptions.value = accounts.map((a) => ({
-    label: a.account_number,
-    value: a.id,
-    holder: nameByUserId[a.customer_id] || '',
-  }))
-  accountNumberByAccountId.value = Object.fromEntries(accounts.map((a) => [a.id, a.account_number]))
-  accountHolderByAccountId.value = Object.fromEntries(
-    accounts.map((a) => [a.id, nameByUserId[a.customer_id] || '']),
-  )
+    accountOptions.value = accounts.map((a) => ({
+      label: a.account_number,
+      value: a.id,
+      holder: nameByUserId[a.customer_id] || '',
+    }))
+    accountNumberByAccountId.value = Object.fromEntries(accounts.map((a) => [a.id, a.account_number]))
+    accountHolderByAccountId.value = Object.fromEntries(
+      accounts.map((a) => [a.id, nameByUserId[a.customer_id] || '']),
+    )
+  } catch (err) {
+    console.error('Failed to load deposit options:', err)
+  }
 }
 
 function openCreate () {
