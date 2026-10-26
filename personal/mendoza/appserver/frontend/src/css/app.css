@@ -1046,20 +1046,17 @@ button.mobile-nav-item:hover {
 }
 
 .mobile-nav-item.active,
-.mobile-nav-item.router-link-active,
 .mobile-nav-item.router-link-exact-active {
   color: #E5C583 !important;
   font-weight: 700;
 }
 
 .mobile-nav-item.active .q-icon,
-.mobile-nav-item.router-link-active .q-icon,
 .mobile-nav-item.router-link-exact-active .q-icon {
   color: #E5C583 !important;
 }
 
 .mobile-nav-item.active .nav-icon-wrap,
-.mobile-nav-item.router-link-active .nav-icon-wrap,
 .mobile-nav-item.router-link-exact-active .nav-icon-wrap {
   background: rgba(229, 197, 131, 0.2) !important;
   color: #E5C583 !important;
