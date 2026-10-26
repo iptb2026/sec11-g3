@@ -45,8 +45,8 @@ export default defineConfig((/* ctx */) => {
       // filenameBasedRouting: true,
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
-      vueRouterBase: '/mendoza-wui/',
-      publicPath: '/mendoza-wui/',
+      vueRouterBase: '/',
+      publicPath: './',
       // define: {},
       // defineEnv: {}
       // ignorePublicFolder: true,
