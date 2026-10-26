@@ -62,6 +62,9 @@ export const useAuthStore = defineStore('auth', {
       // own record (and therefore their role) is resolved client-side by
       // matching the username against the full user list.
       const { data: users } = await api.get('/users/')
+      if (!Array.isArray(users)) {
+        throw new Error('Server returned unexpected response instead of user list')
+      }
       const me = users.find((u) => u.username === username)
       if (!me) {
         throw new Error('Logged in, but could not find a matching user record')
