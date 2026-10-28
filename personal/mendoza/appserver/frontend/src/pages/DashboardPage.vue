@@ -57,7 +57,7 @@
           <span class="android-action-label">Activity</span>
         </router-link>
 
-        <router-link to="/my-account" class="android-action-btn">
+        <router-link to="/customer-transfer" class="android-action-btn">
           <div class="android-action-icon">
             <q-icon name="send" size="24px" />
           </div>
@@ -192,8 +192,12 @@
         <span class="text-caption text-secondary">{{ cards.length }} Active Counters</span>
       </div>
 
-      <div class="row q-col-gutter-md">
-        <div v-for="card in cards" :key="card.label" class="col-12 col-sm-6 col-md-3">
+      <div class="row q-col-gutter-md" :class="{ 'customer-metrics-grid': auth.isCustomer }">
+        <div
+          v-for="card in cards"
+          :key="card.label"
+          :class="auth.isCustomer ? 'col-12 col-sm-6 col-md-6' : 'col-12 col-sm-6 col-md-3'"
+        >
           <q-card
             class="dashboard-stat-card cursor-pointer"
             @click="card.to && router.push(card.to)"

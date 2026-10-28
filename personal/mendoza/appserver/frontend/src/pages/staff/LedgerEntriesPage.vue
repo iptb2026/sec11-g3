@@ -13,7 +13,7 @@
               {{ rows.length }} Entries
             </q-badge>
           </div>
-          <div class="text-caption" style="color: #777784;">Double-entry bookkeeping journal, debit and credit records.</div>
+          <div class="text-caption" style="color: #777784;">Transaction-generated ledger entries are read-only; corrections must use a reversal.</div>
         </div>
       </div>
 
@@ -33,15 +33,6 @@
             <q-icon name="close" class="cursor-pointer" @click="filter = ''" />
           </template>
         </q-input>
-
-        <q-btn
-          color="primary"
-          icon="add"
-          label="New Entry"
-          class="text-weight-bold"
-          unelevated
-          @click="openCreate"
-        />
       </div>
     </div>
 
@@ -85,49 +76,7 @@
         </q-td>
       </template>
 
-      <template #body-cell-actions="props">
-        <q-td :props="props" class="q-gutter-xs">
-          <q-btn dense flat round icon="delete" color="negative" @click="removeRow(props.row)" />
-        </q-td>
-      </template>
     </q-table>
-
-    <!-- Create Dialog -->
-    <q-dialog v-model="showDialog">
-      <q-card style="width: 440px; max-width: 95vw;" class="glass-card">
-        <q-card-section class="row items-center bg-lavender-soft-gradient q-py-md">
-          <q-avatar size="36px" color="primary" text-color="white" icon="menu_book" class="q-mr-sm" />
-          <div>
-            <div class="text-h6 text-weight-bold" style="color: #FFFFFF;">New Ledger Entry</div>
-            <div class="text-caption text-grey-7">Record a debit or credit journal entry</div>
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section class="q-gutter-md q-pt-md">
-          <q-select
-            v-model="form.account_id"
-            label="Account"
-            outlined
-            emit-value
-            map-options
-            :options="accountOptions"
-          />
-          <q-input v-model="form.transaction_reference" label="Transaction Reference" outlined />
-          <q-input v-model="form.transaction_type" label="Transaction Type" outlined hint="e.g. FEE, DEPOSIT, TRANSFER" />
-          <q-input v-model.number="form.debit_amount" label="Debit Amount (PHP)" type="number" outlined />
-          <q-input v-model.number="form.credit_amount" label="Credit Amount (PHP)" type="number" outlined />
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right" class="q-pa-md bg-grey-1">
-          <q-btn flat label="Cancel" color="grey-8" v-close-popup />
-          <q-btn unelevated color="primary" label="Save Entry" class="text-weight-bold" @click="save" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
@@ -147,7 +96,6 @@ const columns = [
   { name: 'credit_amount', label: 'Credit', field: 'credit_amount', align: 'right' },
   { name: 'balance_after', label: 'Balance After', field: 'balance_after', align: 'right' },
   { name: 'transaction_date', label: 'Date', field: 'transaction_date', align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' },
 ]
 
 const rows = ref([])

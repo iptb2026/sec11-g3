@@ -17,8 +17,6 @@ class SessionCreate(BaseModel):
 class SessionOut(BaseModel):
     id: int
     user_id: int
-    jwt_token: str
-    refresh_token: Optional[str] = None
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
     login_at: datetime

@@ -124,6 +124,19 @@ export const useAuthStore = defineStore('auth', {
     async logout ({ notifyBackend = false } = {}) {
       const token = this.token
 
+      this.token = null
+      this.userId = null
+      this.username = null
+      this.firstName = null
+      this.lastName = null
+      this.roleId = null
+      this.roleCode = null
+      this.roleName = null
+      if (api?.defaults?.headers?.common) {
+        delete api.defaults.headers.common.Authorization
+      }
+      localStorage.removeItem(STORAGE_KEY)
+
       try {
         if (notifyBackend && token) {
           await api.post('/auth/logout', null, {

@@ -8,12 +8,12 @@
         </q-avatar>
         <div>
           <div class="row items-center">
-            <span class="text-h5 text-weight-bolder" style="color: #FFFFFF;">Accounts</span>
+            <span class="text-h5 text-weight-bolder" style="color: var(--text-primary);">Accounts</span>
             <q-badge color="accent" text-color="primary" class="q-ml-sm text-weight-bold">
               {{ groupedRows.length }} Accounts
             </q-badge>
           </div>
-          <div class="text-caption" style="color: #777784;">Customer checking, savings, and institutional banking accounts.</div>
+          <div class="text-caption" style="color: var(--text-secondary);">Customer checking, savings, and institutional banking accounts.</div>
         </div>
       </div>
 
@@ -72,7 +72,7 @@
               </div>
             </template>
             <template v-else-if="col.name === 'account_number'">
-              <span class="text-weight-bold" style="font-family: monospace; color: #FFFFFF;">
+              <span class="text-weight-bold" style="font-family: monospace; color: var(--text-primary);">
                 {{ col.value }}
               </span>
             </template>
@@ -82,7 +82,7 @@
               </span>
             </template>
             <template v-else-if="col.name === 'ledger_balance'">
-              <span class="text-weight-medium" style="color: #C50337;">
+              <span class="text-weight-medium" style="color: var(--ios-red);">
                 ₱{{ Number(col.value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
               </span>
             </template>
@@ -107,17 +107,24 @@
         <q-card-section class="row items-center bg-lavender-soft-gradient q-py-md">
           <q-avatar size="36px" color="primary" text-color="white" icon="account_box" class="q-mr-sm" />
           <div>
-            <div class="text-h6 text-weight-bold" style="color: #FFFFFF;">
+            <div class="text-h6 text-weight-bold" style="color: var(--text-primary);">
               {{ editingId ? 'Edit Account' : 'New Account' }}
             </div>
-            <div class="text-caption text-grey-7">Configure customer banking account settings</div>
+            <div class="text-caption text-grey-7" style="color: var(--text-secondary);">Configure customer banking account settings</div>
           </div>
         </q-card-section>
 
         <q-separator />
 
         <q-card-section class="q-gutter-md q-pt-md">
-          <q-input v-model="form.account_number" label="Account Number" outlined />
+          <q-input
+            v-if="editingId"
+            :model-value="selectedRow?.account_number || form.account_number || 'Auto-generated on save'"
+            label="Account Number"
+            outlined
+            readonly
+            class="bg-grey-1"
+          />
           <q-select
             v-model="form.customer_id"
             label="Customer"
@@ -236,7 +243,6 @@ const selectedRow = ref(null)
 const deleting = ref(false)
 const editingId = ref(null)
 const emptyForm = () => ({
-  account_number: '',
   customer_id: null,
   account_type_id: null,
   currency_code: 'PHP',
@@ -269,7 +275,6 @@ function openCreate () {
 function openEdit (row) {
   editingId.value = row.id
   form.value = {
-    account_number: row.account_number,
     customer_id: row.customer_id,
     account_type_id: row.account_type_id,
     currency_code: row.currency_code,

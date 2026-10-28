@@ -44,7 +44,7 @@
           }"
         >
           <span class="brand-title-text">
-            <span style="color: #FFFFFF !important;">My</span><span style="color: #E5C583 !important;">Bank</span>
+            <span style="color: var(--text-primary) !important;">My</span><span style="color: var(--gold-primary) !important;">Bank</span>
           </span>
         </span>
         <span
@@ -114,21 +114,19 @@ const subtitleSize = computed(() => {
 
 .brand-logo-jewel-frame {
   position: relative;
-  background: linear-gradient(145deg, rgba(245, 226, 186, 0.16) 0%, rgba(18, 19, 26, 0.95) 100%);
-  border: 1px solid rgba(229, 197, 131, 0.32);
-  box-shadow: inset 0 1px 0 rgba(245, 226, 186, 0.4),
-              0 6px 20px -2px rgba(0, 0, 0, 0.6),
-              0 0 24px rgba(212, 175, 55, 0.25);
+  background: linear-gradient(145deg, rgba(255, 244, 217, 0.9) 0%, rgba(255, 255, 255, 1) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8),
+              0 7px 18px -8px rgba(29, 36, 48, 0.18);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   padding: 1px;
 }
 
 .brand-logo-wrap:hover .brand-logo-jewel-frame {
   transform: scale(1.08) rotate(1deg);
-  border-color: rgba(229, 197, 131, 0.6);
-  box-shadow: inset 0 1px 0 rgba(255, 240, 195, 0.7),
-              0 10px 28px -2px rgba(0, 0, 0, 0.8),
-              0 0 35px rgba(212, 175, 55, 0.45);
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9),
+              0 12px 22px -10px rgba(29, 36, 48, 0.22);
 }
 
 .brand-title {
@@ -137,15 +135,15 @@ const subtitleSize = computed(() => {
   line-height: 1.1;
   white-space: nowrap;
   flex-shrink: 0;
-  color: #FFFFFF !important;
+  color: var(--text-primary) !important;
 }
 
 .brand-title-text {
-  color: #FFFFFF !important;
+  color: var(--text-primary) !important;
   display: inline-block;
   white-space: nowrap;
   padding-right: 2px;
-  text-shadow: 0 1px 12px rgba(229, 197, 131, 0.45);
+  text-shadow: none;
 }
 
 .luxury-pill-badge {
@@ -207,7 +205,7 @@ const subtitleSize = computed(() => {
 }
 
 .brand-subtitle {
-  color: #C5BFB5 !important;
+  color: var(--text-secondary) !important;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;

@@ -7,7 +7,8 @@ from pydantic import BaseModel
 
 
 class AccountCreate(BaseModel):
-    account_number: str
+    # account_number is NOT accepted from the client — the backend generates
+    # it automatically via app.core.ref_gen.generate_account_number().
     customer_id: int
     account_type_id: int
     currency_code: str = "PHP"
@@ -18,7 +19,6 @@ class AccountCreate(BaseModel):
 
 
 class AccountUpdate(BaseModel):
-    account_number: str
     customer_id: int
     account_type_id: int
     currency_code: str = "PHP"

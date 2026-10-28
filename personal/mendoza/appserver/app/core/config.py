@@ -1,22 +1,50 @@
+import os
+from pathlib import Path
+
+from sqlalchemy.engine import URL
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+if load_dotenv is not None:
+    load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
+
+
+def _required_setting(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Required environment setting {name} is missing")
+    return value
+
+
 class Settings:
     # --- Database ---
-    DB_USER: str = "admin"
-    DB_PASSWORD: str = "1234"
-    DB_HOST: str = "127.0.0.1"
-    DB_PORT: int = 3306
-    DB_NAME: str = "mendoza"
+    DB_USER: str = _required_setting("DB_USER")
+    DB_PASSWORD: str = _required_setting("DB_PASSWORD")
+    DB_HOST: str = _required_setting("DB_HOST")
+    DB_PORT: int = int(_required_setting("DB_PORT"))
+    DB_NAME: str = _required_setting("DB_NAME")
 
     @property
-    def DATABASE_URL(self) -> str:
-        return (
-            f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    def DATABASE_URL(self) -> URL:
+        return URL.create(
+            "mysql+pymysql",
+            username=self.DB_USER,
+            password=self.DB_PASSWORD,
+            host=self.DB_HOST,
+            port=self.DB_PORT,
+            database=self.DB_NAME,
         )
 
     # --- JWT ---
-    SECRET_KEY: str = "f5f6cfcb44c92deaffbeae47dca73bb6b209f35ad226df224af0c235a33090c"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    SECRET_KEY: str = _required_setting("SECRET_KEY")
+    ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
+    if len(SECRET_KEY) < 32:
+        raise RuntimeError("SECRET_KEY must contain at least 32 characters")
 
     # --- App ---
     APP_NAME: str = "Mini Banking System API"

@@ -107,8 +107,13 @@
             icon="delete"
             color="negative"
             aria-label="Delete fee type"
+            :disable="props.row.fee_code === 'INTERNAL_TRANSFER'"
             @click="confirmDelete(props.row)"
-          />
+          >
+            <q-tooltip v-if="props.row.fee_code === 'INTERNAL_TRANSFER'">
+              The internal transfer fee policy cannot be deleted.
+            </q-tooltip>
+          </q-btn>
         </q-td>
       </template>
     </q-table>
@@ -129,8 +134,14 @@
         <q-separator />
 
         <q-card-section class="q-gutter-md q-pt-md">
-          <q-input v-model="form.fee_code" label="Fee Code" outlined hint="e.g. ATM_WITHDRAWAL, OVERDRAFT" />
-          <q-input v-model="form.fee_name" label="Fee Name" outlined />
+          <q-input
+            v-model="form.fee_code"
+            label="Fee Code"
+            outlined
+            hint="e.g. ATM_WITHDRAWAL, OVERDRAFT"
+            :readonly="isInternalTransferFee"
+          />
+          <q-input v-model="form.fee_name" label="Fee Name" outlined :readonly="isInternalTransferFee" />
           <q-input
             v-model="form.fee_description"
             label="Description"
@@ -149,6 +160,8 @@
             label="Percentage Rate %"
             type="number"
             outlined
+            :disable="isInternalTransferFee"
+            :hint="isInternalTransferFee ? 'Internal transfers use a fixed fee only.' : undefined"
           />
         </q-card-section>
 
@@ -244,6 +257,7 @@ const showDialog = ref(false)
 const showDeleteDialog = ref(false)
 const editingId = ref(null)
 const selectedRow = ref(null)
+const isInternalTransferFee = ref(false)
 
 const emptyForm = () => ({
   fee_code: '',
@@ -261,6 +275,25 @@ async function loadRows () {
   try {
     const { data } = await api.get('/fee-types/')
     rows.value = data
+    if (!rows.value.some((row) => row.fee_code === 'INTERNAL_TRANSFER')) {
+      try {
+        await api.post('/fee-types/', {
+          fee_code: 'INTERNAL_TRANSFER',
+          fee_name: 'Customer Internal Transfer',
+          fee_description: 'Fixed fee charged when a customer sends money to another MyBank customer.',
+          fixed_amount: '5.00',
+          percentage_rate: '0.00',
+        })
+      } catch (error) {
+        if (![400, 409].includes(error.response?.status)) throw error
+      }
+
+      const { data: refreshedRows } = await api.get('/fee-types/')
+      rows.value = refreshedRows
+      if (!rows.value.some((row) => row.fee_code === 'INTERNAL_TRANSFER')) {
+        throw new Error('Could not initialize the internal transfer fee policy.')
+      }
+    }
   } catch (err) {
     $q.notify({
       type: 'negative',
@@ -274,11 +307,13 @@ async function loadRows () {
 function openCreate () {
   editingId.value = null
   form.value = emptyForm()
+  isInternalTransferFee.value = false
   showDialog.value = true
 }
 
 function openEdit (row) {
   editingId.value = row.id
+  isInternalTransferFee.value = row.fee_code === 'INTERNAL_TRANSFER'
   form.value = {
     fee_code: row.fee_code,
     fee_name: row.fee_name,
@@ -319,6 +354,7 @@ async function save () {
 }
 
 function confirmDelete (row) {
+  if (row.fee_code === 'INTERNAL_TRANSFER') return
   selectedRow.value = row
   showDeleteDialog.value = true
 }

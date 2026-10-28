@@ -8,9 +8,9 @@ from pydantic import BaseModel, Field
 
 class DepositCreate(BaseModel):
     account_id: int
-    reference_number: str
+    # reference_number is NOT accepted from the client — auto-generated server-side.
     amount: Decimal = Field(gt=0)
-    deposit_channel: Literal["CASH", "ATM", "ONLINE", "INTERBANK"]
+    deposit_channel: Literal["CASH"]  # ATM / ONLINE / INTERBANK removed from new deposits
     deposited_by_user_id: Optional[int] = None
     remarks: Optional[str] = None
     transaction_date: datetime = Field(default_factory=datetime.utcnow)

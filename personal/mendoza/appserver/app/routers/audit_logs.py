@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
+from app.core.access import require_admin
 from app.database.session import get_db
 from app.models.audit_log import AuditLog
 from app.schemas.audit_log import AuditLogOut
@@ -15,15 +16,18 @@ router = APIRouter(
 
 
 @router.get("/", response_model=list[AuditLogOut])
-def list_audit_logs(db: Session = Depends(get_db)):
+def list_audit_logs(actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin(actor_username, db)
     return db.query(AuditLog).order_by(AuditLog.id.desc()).all()
 
 
 @router.get("/{log_id}", response_model=AuditLogOut)
 def get_audit_log(
     log_id: int,
+    actor_username: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    require_admin(actor_username, db)
     log = db.query(AuditLog).filter(
         AuditLog.id == log_id
     ).first()

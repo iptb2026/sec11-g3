@@ -35,17 +35,17 @@
           v-if="auth.roleName"
           icon="verified_user"
           class="gt-xs text-weight-bold shadow-1 q-mr-sm"
-          style="background: rgba(229, 197, 131, 0.12) !important; color: #E5C583 !important; border: 1px solid rgba(229, 197, 131, 0.35);"
+          style="background: rgba(212, 175, 55, 0.10) !important; color: var(--gold-primary) !important; border: 1px solid rgba(212, 175, 55, 0.25);"
         >
           {{ auth.roleName }}
         </q-chip>
 
         <!-- User Profile Pill -->
-        <div class="row items-center gt-sm q-mr-md" style="background: rgba(229, 197, 131, 0.08); border: 1px solid rgba(229, 197, 131, 0.22); padding: 4px 12px; border-radius: 20px;">
-          <q-avatar size="26px" class="text-weight-bold" style="font-size: 0.75rem; background: linear-gradient(135deg, #FBF0D9 0%, #E5C583 100%) !important; color: #08090C !important;">
+        <div class="row items-center gt-sm q-mr-md" style="background: rgba(212, 175, 55, 0.06); border: 1px solid rgba(212, 175, 55, 0.18); padding: 4px 12px; border-radius: 20px;">
+          <q-avatar size="26px" class="text-weight-bold" style="font-size: 0.75rem; background: linear-gradient(135deg, #fff7e6 0%, #d4af37 100%) !important; color: #1d2430 !important;">
             {{ (auth.fullName || auth.username || 'U').charAt(0).toUpperCase() }}
           </q-avatar>
-          <span class="q-ml-sm text-weight-medium text-white text-caption">{{ auth.fullName || auth.username }}</span>
+          <span class="q-ml-sm text-weight-medium text-caption" style="color: var(--text-primary);">{{ auth.fullName || auth.username }}</span>
         </div>
 
         <!-- Live Notifications Button & Flyout -->
@@ -65,7 +65,7 @@
               <q-card-section class="row items-center justify-between q-py-sm q-px-md bg-lavender-soft-gradient">
                 <div class="row items-center">
                   <q-icon name="notifications_active" color="primary" size="20px" class="q-mr-xs" />
-                  <span class="text-subtitle2 text-weight-bolder text-white">Notifications</span>
+                  <span class="text-subtitle2 text-weight-bolder" style="color: var(--text-primary);">Notifications</span>
                   <q-badge v-if="unreadCount > 0" color="primary" class="q-ml-xs text-weight-bold">{{ unreadCount }}</q-badge>
                 </div>
                 <q-btn
@@ -92,20 +92,20 @@
                   v-for="item in notifications"
                   :key="item.id"
                   clickable
-                  :style="!item.is_read ? 'background-color: rgba(229, 197, 131, 0.08);' : ''"
+                  :style="!item.is_read ? 'background-color: rgba(212, 175, 55, 0.06);' : ''"
                   @click="markAsRead(item)"
                 >
                   <q-item-section avatar top style="min-width: 36px; padding-right: 8px;">
-                    <q-avatar size="28px" :style="!item.is_read ? 'background: rgba(229, 197, 131, 0.2); color: #E5C583;' : 'background: rgba(255, 255, 255, 0.08); color: #C5BFB5;'">
+                    <q-avatar size="28px" :style="!item.is_read ? 'background: rgba(212, 175, 55, 0.12); color: var(--gold-primary);' : 'background: rgba(212, 175, 55, 0.04); color: var(--text-secondary);'">
                       <q-icon name="mail" size="16px" />
                     </q-avatar>
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label class="text-weight-bold text-caption text-white">
+                    <q-item-label class="text-weight-bold text-caption" style="color: var(--text-primary);">
                       {{ item.title }}
                     </q-item-label>
-                    <q-item-label caption style="color: #C5BFB5;">{{ item.message }}</q-item-label>
-                    <q-item-label caption style="color: #A39F93; font-size: 0.68rem;" class="q-mt-xs">
+                    <q-item-label caption style="color: var(--text-secondary);">{{ item.message }}</q-item-label>
+                    <q-item-label caption style="color: var(--text-muted); font-size: 0.68rem;" class="q-mt-xs">
                       {{ formatNotificationDate(item.created_at) }}
                     </q-item-label>
                   </q-item-section>
@@ -140,7 +140,7 @@
     >
       <div class="fit column no-wrap justify-between" style="height: 100%; overflow: hidden;">
         <!-- Drawer Header Identity (Pinned at Top) -->
-        <div class="q-pa-md row items-center justify-between border-bottom-subtle" style="flex-shrink: 0; background: rgba(255, 255, 255, 0.02);">
+        <div class="q-pa-md row items-center justify-between border-bottom-subtle" style="flex-shrink: 0; background: rgba(255, 255, 255, 0.25);">
           <div class="column">
             <BrandLogo
               :size="36"
@@ -149,10 +149,10 @@
               theme="dark"
             />
             <div class="q-mt-sm">
-              <div class="text-subtitle1 text-weight-bolder leading-tight" style="color: #FFFFFF;">
+              <div class="text-subtitle1 text-weight-bolder leading-tight" style="color: var(--text-primary);">
                 Welcome Back, {{ auth.firstName || (auth.fullName || auth.username || 'User').split(' ')[0] }}
               </div>
-              <div class="text-caption text-secondary" style="font-size: 0.72rem;">
+              <div class="text-caption text-secondary" style="font-size: 0.72rem; color: var(--text-secondary);">
                 Secure Digital Portal
               </div>
             </div>
@@ -273,14 +273,14 @@
         </div>
 
         <!-- Drawer Bottom User Profile Widget (Pinned at Bottom) -->
-        <div class="q-pa-md border-top-subtle" style="flex-shrink: 0; background: rgba(229, 197, 131, 0.03);">
+        <div class="q-pa-md border-top-subtle" style="flex-shrink: 0; background: rgba(212, 175, 55, 0.03);">
           <div class="row items-center no-wrap">
-            <q-avatar size="36px" class="text-weight-bold shadow-1" style="background: linear-gradient(135deg, #FBF0D9 0%, #E5C583 100%); color: #08090C;">
+            <q-avatar size="36px" class="text-weight-bold shadow-1" style="background: linear-gradient(135deg, #fff7e6 0%, #d4af37 100%); color: #1d2430;">
               {{ (auth.fullName || auth.username || 'U').charAt(0).toUpperCase() }}
             </q-avatar>
             <div class="column q-ml-sm overflow-hidden" style="flex: 1;">
-              <span class="text-weight-bold text-caption ellipsis" style="color: #FFFFFF;">{{ auth.fullName || auth.username }}</span>
-              <span class="text-caption ellipsis" style="color: #E5C583; font-size: 0.7rem; font-weight: 600;">{{ auth.roleName || 'User' }}</span>
+              <span class="text-weight-bold text-caption ellipsis" style="color: var(--text-primary);">{{ auth.fullName || auth.username }}</span>
+              <span class="text-caption ellipsis" style="color: var(--gold-primary); font-size: 0.7rem; font-weight: 600;">{{ auth.roleName || 'User' }}</span>
             </div>
             <q-btn flat round dense icon="logout" color="primary" size="sm" @click="onLogout">
               <q-tooltip>Logout</q-tooltip>

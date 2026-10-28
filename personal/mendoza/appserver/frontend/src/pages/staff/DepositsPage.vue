@@ -127,14 +127,13 @@
             class="bg-grey-1"
           />
 
-          <q-input v-model="form.reference_number" label="Reference Number" outlined />
           <q-input v-model.number="form.amount" label="Amount (PHP)" type="number" outlined />
           <q-select
             v-model="form.deposit_channel"
             label="Channel"
             outlined
             :options="channelOptions"
-            hint="Choose CASH, ATM, ONLINE, or INTERBANK"
+            hint="Use the valid teller cash channel for new deposits"
           />
           <q-input v-model="form.remarks" label="Remarks" type="textarea" outlined rows="2" />
         </q-card-section>
@@ -177,12 +176,12 @@ const accountHolderByAccountId = ref({})
 const userNameByUserId = ref({})
 const loading = ref(false)
 const showDialog = ref(false)
-const emptyForm = () => ({ account_id: null, reference_number: '', amount: 0, deposit_channel: '', remarks: '' })
+const emptyForm = () => ({ account_id: null, amount: 0, deposit_channel: 'CASH', remarks: '' })
 const form = ref(emptyForm())
 
 const accountHolderName = computed(() => accountHolderByAccountId.value[form.value.account_id] || '')
 
-const channelOptions = ['CASH', 'ATM', 'ONLINE', 'INTERBANK']
+const channelOptions = ['CASH']
 
 async function loadRows () {
   loading.value = true

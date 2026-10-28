@@ -177,7 +177,9 @@ function badgeColor (type) {
     WITHDRAWAL: 'negative',
     'TRANSFER OUT': 'negative',
     'TRANSFER IN': 'positive',
+    'TRANSFER FEE': 'negative',
     INTERBANK: 'negative',
+    'INTERBANK REFUND': 'positive',
   }[type] || 'grey'
 }
 
@@ -187,11 +189,12 @@ onMounted(async () => {
     const myAccountIds = allAccounts.filter((a) => a.customer_id === auth.userId).map((a) => a.id)
     const accountNumberById = Object.fromEntries(allAccounts.map((a) => [a.id, a.account_number]))
 
-    const [deposits, withdrawals, transfers, interbank] = await Promise.all([
+    const [deposits, withdrawals, transfers, interbank, fees] = await Promise.all([
       api.get('/deposits/'),
       api.get('/withdrawals/'),
       api.get('/transfers/'),
       api.get('/interbank-transfers/'),
+      api.get('/fee-records/'),
     ])
 
     const combined = []
@@ -251,13 +254,43 @@ onMounted(async () => {
 
     for (const i of interbank.data) {
       if (myAccountIds.includes(i.source_account_id)) {
+        const refunded = ['FAILED', 'REVERSED'].includes(i.status)
+        const totalDebited = Number(i.amount) + Number(i.transfer_fee)
         combined.push({
           key: `ibt-${i.id}`,
           date: i.initiated_at,
           type: 'INTERBANK',
           account_number: accountNumberById[i.source_account_id],
           reference: i.reference_number,
-          amount: Number(i.amount) + Number(i.transfer_fee),
+          amount: totalDebited,
+          direction: 'debit',
+        })
+        if (refunded) {
+          combined.push({
+            key: `ibt-refund-${i.id}`,
+            date: i.completed_at || i.initiated_at,
+            type: 'INTERBANK REFUND',
+            account_number: accountNumberById[i.source_account_id],
+            reference: i.reference_number,
+            amount: totalDebited,
+            direction: 'credit',
+          })
+        }
+      }
+    }
+
+    for (const fee of fees.data) {
+      if (
+        myAccountIds.includes(fee.account_id) &&
+        fee.remarks?.startsWith('Customer internal transfer fee:')
+      ) {
+        combined.push({
+          key: `fee-${fee.id}`,
+          date: fee.charged_at,
+          type: 'TRANSFER FEE',
+          account_number: accountNumberById[fee.account_id],
+          reference: fee.transaction_reference,
+          amount: fee.amount_charged,
           direction: 'debit',
         })
       }

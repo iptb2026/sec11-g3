@@ -5,8 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.audit import add_audit_log, snapshot_model
+from app.core.access import get_actor_scope, require_admin_or_staff
 from app.core.security import get_current_user
 from app.core.db_utils import commit_or_409
+from app.core.ref_gen import generate_account_number
 from app.database.session import get_db
 from app.models.account import Account
 from app.models.account_type import AccountType
@@ -18,6 +20,7 @@ router = APIRouter(prefix="/accounts", tags=["Layer 3 - Accounts"], dependencies
 
 @router.post("/", response_model=AccountOut, status_code=status.HTTP_201_CREATED)
 def create_account(account: AccountCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     customer = db.query(User).filter(User.id == account.customer_id).first()
     if not customer:
         raise HTTPException(status_code=400, detail="customer_id does not exist")
@@ -26,9 +29,15 @@ def create_account(account: AccountCreate, request: Request, actor_username: str
     if not account_type:
         raise HTTPException(status_code=400, detail="account_type_id does not exist")
 
-    existing = db.query(Account).filter(Account.account_number == account.account_number).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="account_number already exists")
+    # Auto-generate a unique account number — retry up to 5 times in the
+    # unlikely event of a collision (collision probability is negligible but
+    # the retry loop keeps us safe under concurrent bursts).
+    for _ in range(5):
+        acct_number = generate_account_number()
+        if not db.query(Account).filter(Account.account_number == acct_number).first():
+            break
+    else:
+        raise HTTPException(status_code=500, detail="Could not generate a unique account number — please try again")
 
     # The starting balance comes from the account type's opening_deposit —
     # never from the client. This is the same "don't trust the client with
@@ -37,6 +46,7 @@ def create_account(account: AccountCreate, request: Request, actor_username: str
 
     new_account = Account(
         **account.model_dump(),
+        account_number=acct_number,
         available_balance=starting_balance,
         ledger_balance=starting_balance,
     )
@@ -49,13 +59,21 @@ def create_account(account: AccountCreate, request: Request, actor_username: str
 
 
 @router.get("/", response_model=list[AccountOut])
-def list_accounts(db: Session = Depends(get_db)):
-    return db.query(Account).order_by(Account.id.desc()).all()
+def list_accounts(actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    actor, role_code, _ = get_actor_scope(actor_username, db)
+    query = db.query(Account)
+    if role_code == "CUSTOMER":
+        query = query.filter(Account.customer_id == actor.id)
+    return query.order_by(Account.id.desc()).all()
 
 
 @router.get("/{account_id}", response_model=AccountOut)
-def get_account(account_id: int, db: Session = Depends(get_db)):
-    account = db.query(Account).filter(Account.id == account_id).first()
+def get_account(account_id: int, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    actor, role_code, _ = get_actor_scope(actor_username, db)
+    query = db.query(Account).filter(Account.id == account_id)
+    if role_code == "CUSTOMER":
+        query = query.filter(Account.customer_id == actor.id)
+    account = query.first()
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
     return account
@@ -63,6 +81,7 @@ def get_account(account_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{account_id}", response_model=AccountOut)
 def update_account(account_id: int, data: AccountUpdate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     account = db.query(Account).filter(Account.id == account_id).first()
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
@@ -90,6 +109,7 @@ def update_account(account_id: int, data: AccountUpdate, request: Request, actor
 
 @router.delete("/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_account(account_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     account = db.query(Account).filter(Account.id == account_id).first()
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")

@@ -13,7 +13,7 @@
               {{ rows.length }} Records
             </q-badge>
           </div>
-          <div class="text-caption" style="color: #777784;">Historical service fees, transaction charges, and penalty debits.</div>
+          <div class="text-caption" style="color: #777784;">Historical fee records are read-only to preserve their linked account balances.</div>
         </div>
       </div>
 
@@ -33,15 +33,6 @@
             <q-icon name="close" class="cursor-pointer" @click="filter = ''" />
           </template>
         </q-input>
-
-        <q-btn
-          color="primary"
-          icon="add"
-          label="New Fee Record"
-          class="text-weight-bold"
-          unelevated
-          @click="openCreate"
-        />
       </div>
     </div>
 
@@ -71,59 +62,7 @@
         </q-td>
       </template>
 
-      <template #body-cell-actions="props">
-        <q-td :props="props" class="q-gutter-xs">
-          <q-btn dense flat round icon="edit" color="primary" @click="openEdit(props.row)" />
-          <q-btn dense flat round icon="delete" color="negative" @click="removeRow(props.row)" />
-        </q-td>
-      </template>
     </q-table>
-
-    <!-- Create / Edit Dialog -->
-    <q-dialog v-model="showDialog">
-      <q-card style="width: 440px; max-width: 95vw;" class="glass-card">
-        <q-card-section class="row items-center bg-lavender-soft-gradient q-py-md">
-          <q-avatar size="36px" color="primary" text-color="white" icon="receipt_long" class="q-mr-sm" />
-          <div>
-            <div class="text-h6 text-weight-bold" style="color: #FFFFFF;">
-              {{ editingId ? 'Edit Fee Record' : 'New Fee Record' }}
-            </div>
-            <div class="text-caption text-grey-7">Record a service charge against an account</div>
-          </div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section class="q-gutter-md q-pt-md">
-          <q-select
-            v-model="form.account_id"
-            label="Account"
-            outlined
-            emit-value
-            map-options
-            :options="accountOptions"
-          />
-          <q-select
-            v-model="form.fee_type_id"
-            label="Fee Type"
-            outlined
-            emit-value
-            map-options
-            :options="feeTypeOptions"
-          />
-          <q-input v-model="form.transaction_reference" label="Transaction Reference" outlined />
-          <q-input v-model.number="form.amount_charged" label="Amount Charged (PHP)" type="number" outlined />
-          <q-input v-model="form.remarks" label="Remarks" type="textarea" outlined rows="2" />
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right" class="q-pa-md bg-grey-1">
-          <q-btn flat label="Cancel" color="grey-8" v-close-popup />
-          <q-btn unelevated color="primary" label="Save Fee Record" class="text-weight-bold" @click="save" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </q-page>
 </template>
 
@@ -141,7 +80,6 @@ const columns = [
   { name: 'transaction_reference', label: 'Reference', field: 'transaction_reference', align: 'left' },
   { name: 'amount_charged', label: 'Amount Charged', field: 'amount_charged', align: 'right' },
   { name: 'charged_at', label: 'Charged At', field: 'charged_at', align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' },
 ]
 
 const rows = ref([])

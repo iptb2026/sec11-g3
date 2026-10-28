@@ -134,9 +134,7 @@
             </template>
           </q-select>
 
-          <q-input v-model="form.transfer_reference" label="Transfer Reference" outlined />
           <q-input v-model.number="form.amount" label="Amount (PHP)" type="number" outlined />
-          <q-input v-model="form.transfer_type" label="Transfer Type" outlined />
           <q-input v-model="form.remarks" label="Remarks" type="textarea" outlined rows="2" />
         </q-card-section>
 
@@ -175,9 +173,7 @@ const showDialog = ref(false)
 const emptyForm = () => ({
   source_account_id: null,
   destination_account_id: null,
-  transfer_reference: '',
   amount: 0,
-  transfer_type: 'INTERNAL',
   remarks: '',
 })
 const form = ref(emptyForm())

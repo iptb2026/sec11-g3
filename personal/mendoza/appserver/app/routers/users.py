@@ -3,6 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from app.core.audit import add_audit_log, snapshot_model
+from app.core.access import get_actor_scope, require_admin
 
 from app.core.db_utils import commit_or_409
 from app.core.security import get_current_user, hash_password
@@ -28,6 +29,7 @@ def create_user(
     user: UserCreate,
     request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)
 ):
+    require_admin(actor_username, db)
     role = db.query(Role).filter(
         Role.id == user.role_id
     ).first()
@@ -71,9 +73,14 @@ def create_user(
     response_model=list[UserOut]
 )
 def list_users(
+    actor_username: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    return db.query(User).order_by(User.id.desc()).all()
+    actor, role_code, _ = get_actor_scope(actor_username, db)
+    query = db.query(User)
+    if role_code == "CUSTOMER":
+        query = query.filter(User.id == actor.id)
+    return query.order_by(User.id.desc()).all()
 
 
 @router.get(
@@ -82,11 +89,14 @@ def list_users(
 )
 def get_user(
     user_id: int,
+    actor_username: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(
-        User.id == user_id
-    ).first()
+    actor, role_code, _ = get_actor_scope(actor_username, db)
+    query = db.query(User).filter(User.id == user_id)
+    if role_code == "CUSTOMER":
+        query = query.filter(User.id == actor.id)
+    user = query.first()
 
     if not user:
         raise HTTPException(
@@ -106,6 +116,7 @@ def update_user(
     user_data: UserUpdate,
     request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)
 ):
+    require_admin(actor_username, db)
     user = db.query(User).filter(
         User.id == user_id
     ).first()
@@ -188,6 +199,7 @@ def delete_user(
     user_id: int,
     request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)
 ):
+    require_admin(actor_username, db)
     user = db.query(User).filter(
         User.id == user_id
     ).first()

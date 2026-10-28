@@ -8,9 +8,9 @@ from pydantic import BaseModel, Field
 
 class WithdrawalCreate(BaseModel):
     account_id: int
-    reference_number: str
+    # reference_number is NOT accepted from the client — auto-generated server-side.
     amount: Decimal = Field(gt=0)
-    withdrawal_channel: Literal["ATM", "ONLINE", "BRANCH", "INTERBANK"]
+    withdrawal_channel: Literal["BRANCH"]  # Only teller/branch withdrawals for new records
     approved_by_user_id: Optional[int] = None
     remarks: Optional[str] = None
     transaction_date: datetime = Field(default_factory=datetime.utcnow)

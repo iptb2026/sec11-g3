@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.audit import add_audit_log, snapshot_model
+from app.core.access import get_actor_scope, require_admin_or_staff
+from app.core.ref_gen import generate_reference
 from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
@@ -15,6 +17,7 @@ router = APIRouter(prefix="/fee-records", tags=["Layer 5 - Fee Records"], depend
 
 @router.post("/", response_model=FeeRecordOut, status_code=status.HTTP_201_CREATED)
 def create_fee_record(fee: FeeRecordCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     # Lock the account row — see the same note in deposits.py / withdrawals.py.
     account = db.query(Account).filter(Account.id == fee.account_id).with_for_update().first()
     if not account:
@@ -23,6 +26,15 @@ def create_fee_record(fee: FeeRecordCreate, request: Request, actor_username: st
     fee_type = db.query(FeeType).filter(FeeType.id == fee.fee_type_id).first()
     if not fee_type:
         raise HTTPException(status_code=400, detail="fee_type_id does not exist")
+
+    if not fee.transaction_reference:
+        for _ in range(5):
+            generated_ref = generate_reference("FEE")
+            if not db.query(FeeRecord).filter(FeeRecord.transaction_reference == generated_ref).first():
+                fee = fee.model_copy(update={"transaction_reference": generated_ref})
+                break
+        else:
+            raise HTTPException(status_code=500, detail="Could not generate a unique fee reference — please retry")
 
     new_fee = FeeRecord(**fee.model_dump())
     db.add(new_fee)
@@ -40,13 +52,21 @@ def create_fee_record(fee: FeeRecordCreate, request: Request, actor_username: st
 
 
 @router.get("/", response_model=list[FeeRecordOut])
-def list_fee_records(db: Session = Depends(get_db)):
-    return db.query(FeeRecord).order_by(FeeRecord.id.desc()).all()
+def list_fee_records(actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    _, _, account_ids = get_actor_scope(actor_username, db)
+    query = db.query(FeeRecord)
+    if account_ids is not None:
+        query = query.filter(FeeRecord.account_id.in_(account_ids))
+    return query.order_by(FeeRecord.id.desc()).all()
 
 
 @router.get("/{fee_id}", response_model=FeeRecordOut)
-def get_fee_record(fee_id: int, db: Session = Depends(get_db)):
-    fee = db.query(FeeRecord).filter(FeeRecord.id == fee_id).first()
+def get_fee_record(fee_id: int, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    _, _, account_ids = get_actor_scope(actor_username, db)
+    query = db.query(FeeRecord).filter(FeeRecord.id == fee_id)
+    if account_ids is not None:
+        query = query.filter(FeeRecord.account_id.in_(account_ids))
+    fee = query.first()
     if not fee:
         raise HTTPException(status_code=404, detail="Fee record not found")
     return fee
@@ -54,6 +74,7 @@ def get_fee_record(fee_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{fee_id}", response_model=FeeRecordOut)
 def update_fee_record(fee_id: int, data: FeeRecordCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     """NOTE: does not re-adjust the account balance for the amount difference."""
     fee = db.query(FeeRecord).filter(FeeRecord.id == fee_id).first()
     if not fee:
@@ -71,6 +92,7 @@ def update_fee_record(fee_id: int, data: FeeRecordCreate, request: Request, acto
 
 @router.delete("/{fee_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_fee_record(fee_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     """NOTE: does not reverse the account balance change."""
     fee = db.query(FeeRecord).filter(FeeRecord.id == fee_id).first()
     if not fee:

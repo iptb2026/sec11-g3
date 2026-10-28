@@ -127,7 +127,6 @@
             class="bg-grey-1"
           />
 
-          <q-input v-model="form.reference_number" label="Reference Number" outlined />
           <q-input v-model.number="form.amount" label="Amount (PHP)" type="number" outlined />
           <q-select
             v-model="form.withdrawal_channel"
@@ -142,7 +141,7 @@
             new-value-mode="add-unique"
             :options="filteredChannelOptions"
             @filter="filterChannelOptions"
-            hint="e.g. ONLINE, ATM, TELLER"
+            hint="Use an existing valid channel for the account and transaction"
           />
           <q-input v-model="form.remarks" label="Remarks" type="textarea" outlined rows="2" />
         </q-card-section>
@@ -167,10 +166,8 @@ const $q = useQuasar()
 
 const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'left' },
-  { name: 'account_id', label: 'Auto ID', field: 'account_id', align: 'left' },
   { name: 'account_number', label: 'Account Number', field: (row) => accountNumberByAccountId.value[row.account_id] || '', align: 'left' },
   { name: 'account_name', label: 'Account Name', field: (row) => accountHolderByAccountId.value[row.account_id] || '', align: 'left' },
-  { name: 'teller', label: 'Teller', field: (row) => userNameByUserId.value[row.approved_by_user_id] || '—', align: 'left' },
   { name: 'reference_number', label: 'Reference', field: 'reference_number', align: 'left' },
   { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
   { name: 'withdrawal_channel', label: 'Channel', field: 'withdrawal_channel', align: 'left' },
@@ -185,12 +182,11 @@ const accountHolderByAccountId = ref({})
 const userNameByUserId = ref({})
 const loading = ref(false)
 const showDialog = ref(false)
-const emptyForm = () => ({ account_id: null, reference_number: '', amount: 0, withdrawal_channel: '', remarks: '' })
+const emptyForm = () => ({ account_id: null, amount: 0, withdrawal_channel: 'BRANCH', remarks: '' })
 const form = ref(emptyForm())
 
 const accountHolderName = computed(() => accountHolderByAccountId.value[form.value.account_id] || '')
 
-// Teller-assisted withdrawals use the existing valid BRANCH database value.
 const channelOptions = [
   { label: 'ONLINE', value: 'ONLINE' },
   { label: 'ATM', value: 'ATM' },

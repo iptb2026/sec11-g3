@@ -3,7 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.audit import add_audit_log, snapshot_model
+from app.core.access import get_actor_scope
 from app.core.security import get_current_user
+from app.core.ref_gen import generate_reference
 from app.database.session import get_db
 from app.models.account import Account
 from app.models.ledger_entry import LedgerEntry
@@ -22,18 +24,17 @@ def create_withdrawal(withdrawal: WithdrawalCreate, request: Request, actor_user
     # this, two withdrawals submitted at nearly the same moment could both
     # read the same starting balance and one of their deductions would be
     # silently lost (a "lost update").
+    actor, role_code, _ = get_actor_scope(actor_username, db)
     account = db.query(Account).filter(Account.id == withdrawal.account_id).with_for_update().first()
     if not account:
         raise HTTPException(status_code=400, detail="account_id does not exist")
+    if role_code == "CUSTOMER" and account.customer_id != actor.id:
+        raise HTTPException(status_code=403, detail="You may only withdraw from your own account")
 
     if withdrawal.approved_by_user_id is not None:
         user = db.query(User).filter(User.id == withdrawal.approved_by_user_id).first()
         if not user:
             raise HTTPException(status_code=400, detail="approved_by_user_id does not exist")
-
-    existing = db.query(Withdrawal).filter(Withdrawal.reference_number == withdrawal.reference_number).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="reference_number already exists")
 
     if account.status != "ACTIVE":
         raise HTTPException(status_code=400, detail=f"Account is {account.status}, cannot withdraw")
@@ -47,7 +48,15 @@ def create_withdrawal(withdrawal: WithdrawalCreate, request: Request, actor_user
     if limit and (limit.daily_used_amount + withdrawal.amount) > limit.daily_limit_amount:
         raise HTTPException(status_code=400, detail="This withdrawal would exceed the daily withdrawal limit")
 
-    new_withdrawal = Withdrawal(**withdrawal.model_dump())
+    # Auto-generate a unique reference number — retry on collision.
+    for _ in range(5):
+        ref = generate_reference("WDL")
+        if not db.query(Withdrawal).filter(Withdrawal.reference_number == ref).first():
+            break
+    else:
+        raise HTTPException(status_code=500, detail="Could not generate unique reference — please retry")
+
+    new_withdrawal = Withdrawal(**withdrawal.model_dump(), reference_number=ref)
     db.add(new_withdrawal)
 
     account.available_balance -= withdrawal.amount
@@ -83,13 +92,21 @@ def create_withdrawal(withdrawal: WithdrawalCreate, request: Request, actor_user
 
 
 @router.get("/", response_model=list[WithdrawalOut])
-def list_withdrawals(db: Session = Depends(get_db)):
-    return db.query(Withdrawal).order_by(Withdrawal.id.desc()).all()
+def list_withdrawals(actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    _, _, account_ids = get_actor_scope(actor_username, db)
+    query = db.query(Withdrawal)
+    if account_ids is not None:
+        query = query.filter(Withdrawal.account_id.in_(account_ids))
+    return query.order_by(Withdrawal.id.desc()).all()
 
 
 @router.get("/{withdrawal_id}", response_model=WithdrawalOut)
-def get_withdrawal(withdrawal_id: int, db: Session = Depends(get_db)):
-    withdrawal = db.query(Withdrawal).filter(Withdrawal.id == withdrawal_id).first()
+def get_withdrawal(withdrawal_id: int, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    _, _, account_ids = get_actor_scope(actor_username, db)
+    query = db.query(Withdrawal).filter(Withdrawal.id == withdrawal_id)
+    if account_ids is not None:
+        query = query.filter(Withdrawal.account_id.in_(account_ids))
+    withdrawal = query.first()
     if not withdrawal:
         raise HTTPException(status_code=404, detail="Withdrawal not found")
     return withdrawal

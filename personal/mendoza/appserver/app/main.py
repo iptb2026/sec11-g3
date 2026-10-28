@@ -1,8 +1,13 @@
+from decimal import Decimal
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import IntegrityError
 
 from app.core.config import settings
-from app.database.session import Base, engine
+from app.core.audit import add_audit_log, snapshot_model
+from app.database.session import Base, SessionLocal, engine
+from app.models.fee_type import FeeType
 
 from app.routers import (
     roles,
@@ -35,6 +40,41 @@ app = FastAPI(
     openapi_url="/openapi.json",
     swagger_ui_parameters={"url": "/mendoza/openapi.json"},
 )
+
+
+@app.on_event("startup")
+def ensure_internal_transfer_fee():
+    db = SessionLocal()
+    try:
+        fee_type = db.query(FeeType).filter(FeeType.fee_code == "INTERNAL_TRANSFER").first()
+        if fee_type:
+            return
+
+        fee_type = FeeType(
+            fee_code="INTERNAL_TRANSFER",
+            fee_name="Customer Internal Transfer",
+            fee_description="Fixed fee charged when a customer sends money to another MyBank customer.",
+            fixed_amount=Decimal("5.00"),
+            percentage_rate=Decimal("0.00"),
+        )
+        db.add(fee_type)
+        db.flush()
+        add_audit_log(
+            db,
+            "system",
+            "CREATE",
+            "FeeType",
+            fee_type.id,
+            new_value=snapshot_model(fee_type),
+        )
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        if not db.query(FeeType).filter(FeeType.fee_code == "INTERNAL_TRANSFER").first():
+            raise
+    finally:
+        db.close()
+
 
 # ==== LAYER 1 ====
 app.include_router(roles.router)

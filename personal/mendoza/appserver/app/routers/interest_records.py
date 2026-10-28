@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.audit import add_audit_log, snapshot_model
+from app.core.access import get_actor_scope, require_admin_or_staff
 from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/interest-records", tags=["Layer 5 - Interest Records
 
 @router.post("/", response_model=InterestRecordOut, status_code=status.HTTP_201_CREATED)
 def create_interest_record(record: InterestRecordCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     # Lock the account row — see the same note in deposits.py / withdrawals.py.
     account = db.query(Account).filter(Account.id == record.account_id).with_for_update().first()
     if not account:
@@ -46,13 +48,21 @@ def create_interest_record(record: InterestRecordCreate, request: Request, actor
 
 
 @router.get("/", response_model=list[InterestRecordOut])
-def list_interest_records(db: Session = Depends(get_db)):
-    return db.query(InterestRecord).order_by(InterestRecord.id.desc()).all()
+def list_interest_records(actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    _, _, account_ids = get_actor_scope(actor_username, db)
+    query = db.query(InterestRecord)
+    if account_ids is not None:
+        query = query.filter(InterestRecord.account_id.in_(account_ids))
+    return query.order_by(InterestRecord.id.desc()).all()
 
 
 @router.get("/{record_id}", response_model=InterestRecordOut)
-def get_interest_record(record_id: int, db: Session = Depends(get_db)):
-    record = db.query(InterestRecord).filter(InterestRecord.id == record_id).first()
+def get_interest_record(record_id: int, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    _, _, account_ids = get_actor_scope(actor_username, db)
+    query = db.query(InterestRecord).filter(InterestRecord.id == record_id)
+    if account_ids is not None:
+        query = query.filter(InterestRecord.account_id.in_(account_ids))
+    record = query.first()
     if not record:
         raise HTTPException(status_code=404, detail="Interest record not found")
     return record
@@ -60,6 +70,7 @@ def get_interest_record(record_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_interest_record(record_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     """NOTE: does not reverse the account balance change."""
     record = db.query(InterestRecord).filter(InterestRecord.id == record_id).first()
     if not record:

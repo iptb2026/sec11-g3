@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.audit import add_audit_log, snapshot_model
+from app.core.access import get_actor_scope, require_admin_or_staff
 from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.account import Account
@@ -14,6 +15,7 @@ router = APIRouter(prefix="/ledger-entries", tags=["Layer 5 - Ledger Entries"], 
 
 @router.post("/", response_model=LedgerEntryOut, status_code=status.HTTP_201_CREATED)
 def create_ledger_entry(entry: LedgerEntryCreate, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     account = db.query(Account).filter(Account.id == entry.account_id).first()
     if not account:
         raise HTTPException(status_code=400, detail="account_id does not exist")
@@ -38,13 +40,21 @@ def create_ledger_entry(entry: LedgerEntryCreate, request: Request, actor_userna
 
 
 @router.get("/", response_model=list[LedgerEntryOut])
-def list_ledger_entries(db: Session = Depends(get_db)):
-    return db.query(LedgerEntry).order_by(LedgerEntry.id.desc()).all()
+def list_ledger_entries(actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    _, _, account_ids = get_actor_scope(actor_username, db)
+    query = db.query(LedgerEntry)
+    if account_ids is not None:
+        query = query.filter(LedgerEntry.account_id.in_(account_ids))
+    return query.order_by(LedgerEntry.id.desc()).all()
 
 
 @router.get("/{entry_id}", response_model=LedgerEntryOut)
-def get_ledger_entry(entry_id: int, db: Session = Depends(get_db)):
-    entry = db.query(LedgerEntry).filter(LedgerEntry.id == entry_id).first()
+def get_ledger_entry(entry_id: int, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    _, _, account_ids = get_actor_scope(actor_username, db)
+    query = db.query(LedgerEntry).filter(LedgerEntry.id == entry_id)
+    if account_ids is not None:
+        query = query.filter(LedgerEntry.account_id.in_(account_ids))
+    entry = query.first()
     if not entry:
         raise HTTPException(status_code=404, detail="Ledger entry not found")
     return entry
@@ -52,6 +62,7 @@ def get_ledger_entry(entry_id: int, db: Session = Depends(get_db)):
 
 @router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_ledger_entry(entry_id: int, request: Request, actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin_or_staff(actor_username, db)
     entry = db.query(LedgerEntry).filter(LedgerEntry.id == entry_id).first()
     if not entry:
         raise HTTPException(status_code=404, detail="Ledger entry not found")

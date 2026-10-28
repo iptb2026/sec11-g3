@@ -103,8 +103,6 @@
             title="Mark FAILED"
             @click="markStatus(props.row, 'FAILED')"
           />
-          <q-btn dense flat round icon="edit" color="primary" @click="openEdit(props.row)" />
-          <q-btn dense flat round icon="delete" color="negative" @click="removeRow(props.row)" />
         </q-td>
       </template>
     </q-table>
@@ -143,9 +141,23 @@
           />
           <q-input v-model="form.target_account_number" label="Target Account Number" outlined />
           <q-input v-model="form.beneficiary_name" label="Beneficiary Name" outlined />
-          <q-input v-model="form.reference_number" label="Reference Number" outlined />
+          <q-input
+            v-if="editingId"
+            :model-value="selectedRow?.reference_number || 'Auto-generated on save'"
+            label="Reference Number"
+            outlined
+            readonly
+            class="bg-grey-1"
+          />
           <q-input v-model.number="form.amount" label="Amount (PHP)" type="number" outlined />
-          <q-input v-model.number="form.transfer_fee" label="Transfer Fee (PHP)" type="number" outlined />
+          <q-input
+            v-if="editingId"
+            :model-value="selectedRow?.transfer_fee ?? 'Auto-calculated from PESONET policy'"
+            label="Transfer Fee (PHP)"
+            outlined
+            readonly
+            class="bg-grey-1"
+          />
         </q-card-section>
 
         <q-separator />
@@ -191,14 +203,13 @@ const bankOptions = ref([])
 const loading = ref(false)
 const showDialog = ref(false)
 const editingId = ref(null)
+const selectedRow = ref(null)
 const emptyForm = () => ({
   source_account_id: null,
   target_bank_id: null,
   target_account_number: '',
   beneficiary_name: '',
-  reference_number: '',
   amount: 0,
-  transfer_fee: 0,
 })
 const form = ref(emptyForm())
 
@@ -219,20 +230,20 @@ async function loadOptions () {
 
 function openCreate () {
   editingId.value = null
+  selectedRow.value = null
   form.value = emptyForm()
   showDialog.value = true
 }
 
 function openEdit (row) {
   editingId.value = row.id
+  selectedRow.value = row
   form.value = {
     source_account_id: row.source_account_id,
     target_bank_id: row.target_bank_id,
     target_account_number: row.target_account_number,
     beneficiary_name: row.beneficiary_name,
-    reference_number: row.reference_number,
     amount: Number(row.amount),
-    transfer_fee: Number(row.transfer_fee),
   }
   showDialog.value = true
 }

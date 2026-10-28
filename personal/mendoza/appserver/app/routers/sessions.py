@@ -5,19 +5,27 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.db_utils import commit_or_409
+from app.core.access import require_admin
+from app.core.security import get_current_user
 from app.database.session import get_db
 from app.models.session import UserSession
 from app.models.user import User
 from app.schemas.session import SessionCreate, SessionOut
 
-router = APIRouter(prefix="/sessions", tags=["Layer 2 - Sessions"])
+router = APIRouter(
+    prefix="/sessions",
+    tags=["Layer 2 - Sessions"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.post("/", response_model=SessionOut, status_code=status.HTTP_201_CREATED)
 def create_session(
     session_data: SessionCreate,
+    actor_username: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    require_admin(actor_username, db)
     user = db.query(User).filter(
         User.id == session_data.user_id
     ).first()
@@ -40,15 +48,18 @@ def create_session(
 
 
 @router.get("/", response_model=list[SessionOut])
-def list_sessions(db: Session = Depends(get_db)):
+def list_sessions(actor_username: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    require_admin(actor_username, db)
     return db.query(UserSession).order_by(UserSession.id.desc()).all()
 
 
 @router.get("/{session_id}", response_model=SessionOut)
 def get_session(
     session_id: int,
+    actor_username: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    require_admin(actor_username, db)
     session = db.query(UserSession).filter(
         UserSession.id == session_id
     ).first()
@@ -65,8 +76,10 @@ def get_session(
 @router.put("/{session_id}/revoke", response_model=SessionOut)
 def revoke_session(
     session_id: int,
+    actor_username: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    require_admin(actor_username, db)
     session = db.query(UserSession).filter(
         UserSession.id == session_id
     ).first()
@@ -88,8 +101,10 @@ def revoke_session(
 @router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_session(
     session_id: int,
+    actor_username: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    require_admin(actor_username, db)
     session = db.query(UserSession).filter(
         UserSession.id == session_id
     ).first()
